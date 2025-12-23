@@ -11,7 +11,7 @@
 - `*.tfvars`
 - `*.tfvars.json`
 
-### Файлы оверрайдовЖ
+### Файлы оверрайдов
 - `override.tf`
 - `override.tf.json`
 - `*_override.tf`
