@@ -1,2 +1,21 @@
-# devops-netology
-five  commits
+## .gitignore содержит следующее:
+### Локальные директории
+- `.terraform/` — локальная рабочая директория Terraform с загруженными модулями и плагинами
+
+### Файлы *.tfstate
+- `*.tfstate` — файлы состояния Terraform, содержащие информацию об инфраструктуре
+- `*.tfstate.*` — резервные копии и временные файлы состояния
+- `.terraform.tfstate.lock.info` — информация о блокировке, создаваемая во время `terraform apply`
+
+### Файлы переменных
+- `*.tfvars`
+- `*.tfvars.json`
+
+### Файлы оверрайдовЖ
+- `override.tf`
+- `override.tf.json`
+- `*_override.tf`
+- `*_override.tf.json`
+
+### Конфигурация CLI
+- `.terraformrc` - `terraform.rc`
