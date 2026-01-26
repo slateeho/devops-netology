@@ -39,14 +39,14 @@ async def lifespan(app: FastAPI):
             print("MySQL did not become ready in time.")
             yield
             return
-        
+
         cursor = db.cursor()
         # Create database if not exists
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`")
         db.commit()
         cursor.close()
         db.close()
-        
+
         # Connect to database
         db = mysql.connector.connect(
             host=db_host,
@@ -55,23 +55,30 @@ async def lifespan(app: FastAPI):
             database=db_name
         )
         cursor = db.cursor()
-        create_user_query = f"""
-        CREATE USER IF NOT EXISTS '{db_user}'@'%' IDENTIFIED WITH {db_auth_plugin} BY '{db_password}';
-        GRANT ALL PRIVILEGES ON `{db_name}`.* TO '{db_user}'@'%';
-        FLUSH PRIVILEGES;
-        """
-        cursor.execute(create_user_query)
-        db.commit()
+        try:
+            cursor.execute(f"CREATE USER IF NOT EXISTS '{db_user}'@'%' IDENTIFIED BY '{db_password}'")
+            db.commit()
+        except Exception as e:
+            print(f"User creation error: {e}")
+        
+        try:
+            cursor.execute(f"GRANT ALL PRIVILEGES ON `{db_name}`.* TO '{db_user}'@'%'")
+            db.commit()
+        except Exception as e:
+            print(f"Grant error: {e}")
+        
+        try:
+            cursor.execute("FLUSH PRIVILEGES")
+            db.commit()
+        except Exception as e:
+            print(f"Flush error: {e}")
+        
         # Create table
-        create_table_query = f"""
-        CREATE TABLE IF NOT EXISTS `{db_table}` (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            request_date DATETIME,
-            request_ip VARCHAR(255)
-        )
-        """
-        cursor.execute(create_table_query)
-        db.commit()
+        try:
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS `{db_table}` (id INT AUTO_INCREMENT PRIMARY KEY, request_date DATETIME, request_ip VARCHAR(255))")
+            db.commit()
+        except Exception as e:
+            print(f"Table creation error: {e}")
         print(f"Соединение с БД установлено и таблица \'{db_table}\' готова к работе.")
         cursor.close()
         db.close()
