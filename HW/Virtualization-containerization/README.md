@@ -379,7 +379,7 @@ if __name__ == '__main__':
 
 ![Docker практическое применение](Практическое_применение_Docker/2/4-1.png)
 
-[Ссылка на форк](https://github.com/slateeho/shvirtd-example-python.git)
+[Ссылка на форк](https://github.com/slateeho/devops-netology/tree/main/shvirtd-example-python)
 
 
 ## **Задача 5***
