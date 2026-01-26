@@ -1,6 +1,8 @@
 FROM python:3.12-slim
 
-#  Ваш код здесь #
+RUN pip install fastapi uvicorn mysql-connector-python
 
-# Запускаем приложение с помощью uvicorn, делая его доступным по сети
+COPY . /app
+WORKDIR /app
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"] 

@@ -1,45 +1,50 @@
+version: "3.8"
 services:
   db:
     image: mysql:8
-    restart: always
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - backend
+      myapp_net:
+        ipv4_address: 10.0.1.3
+    deploy:
+      replicas: 1
 
   web:
-    image: cr.yandex/crp2b5pkp2eu3ecdvgva/fastapi:latest
-    restart: always
-    ports:
-      - "5000:5000"
+    image: localhost:8082/fastapi:latest
+    env_file:
+      - .env
     environment:
-      DB_HOST: db
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_TABLE: ${MYSQL_TABLE}
+      - DB_HOST=${DB_HOST}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_TABLE=${MYSQL_TABLE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "8082:5000"
     depends_on:
       - db
     networks:
-      backend:
-        ipv4_address: 172.20.0.5
-
-include:
-  - proxy.yaml
+      myapp_net:
+        ipv4_address: 10.0.1.10
+    deploy:
+      replicas: 2
 
 volumes:
   mysql_data:
+    driver: local
 
 networks:
-  backend:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
+  myapp_net:
+    driver: overlay
+    attachable: true
