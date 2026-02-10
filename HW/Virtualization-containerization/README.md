@@ -865,7 +865,7 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 iptables-save > /etc/iptables/iptables.rules
 ```
-Вывод `tree -L2 /app`:<t_��>,ý:q""ýý
+Вывод `tree -L2 /app`:<t_��>,ý:q""ýý
 
 ![Docker практическое применение](Практическое_применение_Docker/app_structure.png)
 
