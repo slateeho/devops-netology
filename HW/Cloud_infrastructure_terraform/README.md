@@ -5,15 +5,15 @@
 
 ## Задание 1
 
-[Директория с main.tf](Cloud_infrastructure_terraform/terraform_intro/)
+[Директория с main.tf](terraform_intro/)
 
-![Введение в виртуализацию](Cloud_infrastructure_terraform/terraform_intro/1.png)
+![Введение в виртуализацию](terraform_intro/1.png)
 
 Согласно этому [.gitignore](https://raw.githubusercontent.com/netology-code/ter-homeworks/4730505f991c173ff42f44d7cffaa7366041e2f7/01/src/.gitignore), в файле под названием `personal.auto.tfvars` допустимо сохранить личную, секретную информацию (логины, пароли, ключи, токены и т.д).
 
 Поскольку в раскомментированном блоке кода `main.tf` содержится тип ресурса без указания его наименования, а  также неверно поименованный ресурс.
 
-![Введение в виртуализацию](Cloud_infrastructure_terraform/terraform_intro/2.png)
+![Введение в виртуализацию](terraform_intro/2.png)
 
 Опасность -auto-approve заключается
 
@@ -23,7 +23,7 @@
 - вероятность частичного создания инфраструктуры
 - возникновение ошибок при наличии любых интерактивных скриптов (например, *.expect) (требующих взаимодействия с пользователем через терминал)
 
-![Введение в виртуализацию](Cloud_infrastructure_terraform/terraform_intro/3.png)
+![Введение в виртуализацию](terraform_intro/3.png)
 
 Лучшими практиками при выполнении plan \ apply в разных папках\окружениях и т.п. будет обеспечение консистентности хранилища провайдеров\версий .terraform.lock.hcl путем принудительного указания `terraform init -lockfile=readonly` как перед `terraform plan` (или, лучше `terraform plan -out=tfplan`) так и перед  `terraform apply`, в том числе и при использовании `-auto-approve`.
 
@@ -49,12 +49,12 @@
 
 Проверка Env в remote docker context на созданной ВМ:
 
-![Введение в виртуализацию](Cloud_infrastructure_terraform/terraform_intro/4.png)
+![Введение в виртуализацию](terraform_intro/4.png)
 
 ## Задание 3
 
 Opentofu init \ apply в yandex и docker remote директориях:
 
-![Введение в виртуализацию](Cloud_infrastructure_terraform/terraform_intro/5.png)
+![Введение в виртуализацию](terraform_intro/5.png)
 </details>
 
