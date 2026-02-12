@@ -1,0 +1,7 @@
+{
+    "kiroAgent.agentAutonomy": "Supervised",
+    "kiroAgent.experiments": {
+        
+    },
+    "kiroAgent.notifications.agent.actionRequired": false
+}
