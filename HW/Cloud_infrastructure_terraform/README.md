@@ -71,13 +71,13 @@ Opentofu init \ apply в yandex и docker remote директориях:
 • неверный  platform_id, 'standart-v4' -> 'standatd-v3'.
 Опции Preemptable = true и использьвание 20%  CPU позволяет экономить денежные средства, уменьшая их потребление путем снижения как платы за CPU, так и позволяя автоматически выключать неиспользуемую виртуальную машину, снижая расход до нуля  
 
-![Основы в Terraform](terraform_basics/1.png)
+![Основы в Terraform](terraform_basics/task_1/pngs/1.png)
 
-![Основы в Terraform](terraform_basics/2.png)
+![Основы в Terraform](terraform_basics/task_1/pngs/2.png)
 
 ## Задание 2-4
 
-![Основы в Terraform](terraform_basics/3.png)
+![Основы в Terraform](terraform_basics/task_1/pngs/3.png)
 
 ## Задание 5-6
 
@@ -85,15 +85,15 @@ Opentofu init \ apply в yandex и docker remote директориях:
 
 ### Задание 7*
 
-![Основы в Terraform](terraform_basics/4.png)
+![Основы в Terraform](terraform_basics/task_1/pngs/4.png)
 
 ### Задание 8*
 
-![Основы в Terraform](terraform_basics/8.png)
+![Основы в Terraform](terraform_basics/task_1/pngs/8.png)
 
 ### Задание 9*
 
-![Основы в Terraform](terraform_basics/9.png)
+![Основы в Terraform](terraform_basics/task_1/pngs/9.png)
 
 </details>
 
