@@ -81,7 +81,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 
 ## Задание 5-6
 
-Задание выполнено коде папки `terraform_basics`
+Задание выполнено в коде папки `terraform_basics`
 
 ### Задание 7*
 
