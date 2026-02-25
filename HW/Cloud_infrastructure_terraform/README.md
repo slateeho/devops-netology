@@ -96,3 +96,21 @@ Opentofu init \ apply в yandex и docker remote директориях:
 ![Основы в Terraform](terraform_basics/task_1/pngs/9.png)
 
 </details>
+
+<details>
+<summary>03. Управляющие конструкции в коде Terraform Основы Terraform.</summary>
+
+### Задание 1
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/1.png)
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/2.png)
+
+### Задания 2-4
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4.png)
+
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4_1.png)
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4.png)

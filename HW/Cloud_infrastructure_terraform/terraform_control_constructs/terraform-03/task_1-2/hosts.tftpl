@@ -1,0 +1,14 @@
+[webservers]
+%{for name in webservers ~}
+${name} ansible_host=${webservers[name].ip} fqdn=${webservers[name].fqdn} ansible_user=ubuntu ansible_ssh_private_key_file=${webservers[name].key}
+%{endfor ~}
+
+[databases]
+%{for name in databases ~}
+${name} ansible_host=${databases[name].ip} fqdn=${databases[name].fqdn} ansible_user=ubuntu ansible_ssh_private_key_file=${databases[name].key}
+%{endfor ~}
+
+[storage]
+%{for name in storage ~}
+${name} ansible_host=${storage[name].ip} fqdn=${storage[name].fqdn} ansible_user=ubuntu ansible_ssh_private_key_file=${storage[name].key}
+%{endfor ~}
