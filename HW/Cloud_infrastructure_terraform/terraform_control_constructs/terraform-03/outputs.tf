@@ -1,5 +1,18 @@
-output "web_instance_names" {
-  value = yandex_compute_instance.web[*].name
+locals {
+  web_instances_flat = flatten([
+    for vm in yandex_compute_instance.web : [
+      {
+        name        = vm.name
+        fqdn        = vm.fqdn
+        external_ip = vm.network_interface[0].nat_ip_address
+      }
+    ]
+  ])
+}
+
+output "web_instances" {
+  description = "Web instances with flattened structure"
+  value       = local.web_instances_flat
 }
 
 output "db_instances_from_child" {
@@ -7,9 +20,5 @@ output "db_instances_from_child" {
 }
 
 output "storage_instance_from_child" {
-  value = {
-    name = module.child.storage_instance_names
-    nat_ip = module.child.storage_instance_external_ip
-    fqdn = module.child.storage_instance_fqdn
-  }
+  value = module.child.storage_instance
 }

@@ -15,18 +15,18 @@ all:
 %{endfor ~}
     databases:
       hosts:
-%{for db_name, db_instance in module.child.db_instances ~}
+%{for db_instance in module.child.db_instances ~}
         ${db_instance.name}:
-          ansible_host: ${db_instance.network_interface[0].nat_ip_address}
+          ansible_host: ${db_instance.external_ip}
           fqdn: ${db_instance.fqdn}
           ansible_user: ${local.ansible_user}
           ansible_ssh_private_key_file: ${local.db_private_key}
 %{endfor ~}
     storage:
       hosts:
-        ${module.child.storage_instance_names}:
-          ansible_host: ${module.child.storage_instance_external_ip}
-          fqdn: ${module.child.storage_instance_fqdn}
+        ${module.child.storage_instance[0].name}:
+          ansible_host: ${module.child.storage_instance[0].external_ip}
+          fqdn: ${module.child.storage_instance[0].fqdn}
           ansible_user: ${local.ansible_user}
           ansible_ssh_private_key_file: ${local.db_private_key}
 INI
