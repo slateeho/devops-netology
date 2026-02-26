@@ -116,17 +116,23 @@ Opentofu init \ apply в yandex и docker remote директориях:
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4.png)
 
 
-### Задания 5*
+### Заданиe 5*
 
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
 
 
-### Задания 5*
+### Заданиe 5*
 
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
 
 
-### Задания 6*
+### Заданиe 6*
 
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/6.png)
+
+
+### Заданиe 7*
+
+Решение находится в папке `terraform_control_constructs/terraform-03/task_7_asterisk`
+
 
