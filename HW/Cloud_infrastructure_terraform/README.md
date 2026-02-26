@@ -114,3 +114,9 @@ Opentofu init \ apply в yandex и docker remote директориях:
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4_1.png)
 
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4.png)
+
+
+### Задания 5*
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
+
