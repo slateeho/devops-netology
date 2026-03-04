@@ -9,15 +9,13 @@ locals {
     ]
   ])
 
-  storage_instance_flat = flatten([
-    for vm in [yandex_compute_instance.storage] : [
-      {
-        name        = vm.name
-        fqdn        = vm.fqdn
-        external_ip = vm.network_interface[0].nat_ip_address
-      }
-    ]
-  ])
+  storage_instance_flat = [
+    {
+      name        = yandex_compute_instance.storage.name
+      fqdn        = yandex_compute_instance.storage.fqdn
+      external_ip = yandex_compute_instance.storage.network_interface[0].nat_ip_address
+    }
+  ]
 }
 
 output "db_instances" {
