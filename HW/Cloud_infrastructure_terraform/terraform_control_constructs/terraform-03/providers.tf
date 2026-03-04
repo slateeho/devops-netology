@@ -16,13 +16,13 @@ provider "aws" {
   region = "eu-north-1"
 }
 
-data "aws_ssm_parameter" "token" {
-  name            = "/yandex/yc-oauth-token"
+data "aws_ssm_parameter" "iam_token" {
+  name            = "/yandex/helgi177-iam-token"
   with_decryption = true
 }
 
 provider "yandex" {
-  token     = data.aws_ssm_parameter.token.value
+  token     = data.aws_ssm_parameter.iam_token.value
   cloud_id  = var.cloud_id
   folder_id = var.folder_id
   zone      = var.default_zone

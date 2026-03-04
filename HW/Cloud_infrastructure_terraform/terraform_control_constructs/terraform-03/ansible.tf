@@ -15,7 +15,7 @@ all:
 %{endfor ~}
     databases:
       hosts:
-%{for db_instance in module.child.db_instances ~}
+%{for db_instance in module.child.instances ~}
         ${db_instance.name}:
           ansible_host: ${db_instance.external_ip}
           fqdn: ${db_instance.fqdn}
@@ -24,11 +24,15 @@ all:
 %{endfor ~}
     storage:
       hosts:
-        ${module.child.storage_instance[0].name}:
-          ansible_host: ${module.child.storage_instance[0].external_ip}
-          fqdn: ${module.child.storage_instance[0].fqdn}
+%{for instance in module.child.instances ~}
+%{if strcontains(instance.name, "storage") ~}
+        ${instance.name}:
+          ansible_host: ${instance.external_ip}
+          fqdn: ${instance.fqdn}
           ansible_user: ${local.ansible_user}
           ansible_ssh_private_key_file: ${local.db_private_key}
+%{endif ~}
+%{endfor ~}
 INI
   filename = "${path.module}/ansible/hosts.yaml"
 }

@@ -16,9 +16,9 @@ output "web_instances" {
 }
 
 output "db_instances_from_child" {
-  value = module.child.db_instances
+  value = module.child.instances
 }
 
-output "storage_instance_from_child" {
-  value = module.child.storage_instance
+output "storage_disk_ids_from_child" {
+  value = module.child.storage_disk_ids
 }
