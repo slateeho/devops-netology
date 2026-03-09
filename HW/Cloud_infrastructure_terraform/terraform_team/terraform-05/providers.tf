@@ -14,6 +14,8 @@ terraform {
     key     = "terraform.tfstate"
     region  = "ru-central1"
 
+    use_lockfile = true
+
     endpoints = {
       s3 = "https://storage.yandexcloud.net"
     }
