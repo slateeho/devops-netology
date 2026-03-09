@@ -46,7 +46,7 @@ module "db" {
   assign_public_ip       = false
   database_name          = "test"
   user_name              = "app"
-  user_password          = "password123"
+  user_password          = data.aws_ssm_parameter.db_password.value
   user_permissions       = [
     {
       database_name = "test"

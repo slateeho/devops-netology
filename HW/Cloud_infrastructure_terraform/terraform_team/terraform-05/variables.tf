@@ -46,23 +46,3 @@ variable "ha" {
   default     = false
   description = "Enable high availability"
 }
-
-variable "s3_backend" {
-  type = map(any)
-  default = {
-    bucket                      = "lao-ush244oz"
-    key                         = "terraform.tfstate"
-    region                      = "ru-central1"
-    use_lockfile                = true
-    skip_region_validation      = true
-    skip_credentials_validation = true
-    skip_requesting_account_id  = true
-    skip_s3_checksum            = true
-  }
-}
-
-variable "yc_sync_sa" {
-  type        = string
-  default     = "s3-sync-sa"
-  description = "Service account name for S3"
-}

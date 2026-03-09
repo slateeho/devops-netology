@@ -18,7 +18,20 @@ resource "yandex_vpc_security_group" "vpc_dev" {
   folder_id  = var.folder_id
 
   ingress {
-    protocol       = "ANY"
+    protocol       = "TCP"
+    port           = 80
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol       = "TCP"
+    port           = 443
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol       = "TCP"
+    port           = 3306
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 

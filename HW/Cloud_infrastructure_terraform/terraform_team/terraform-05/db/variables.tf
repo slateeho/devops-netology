@@ -117,3 +117,7 @@ variable "authentication_plugin" {
   type    = string
   default = "SHA256_PASSWORD"
 }
+
+variable "security_group_id" {
+  type = string
+}

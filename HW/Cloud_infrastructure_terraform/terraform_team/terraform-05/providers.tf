@@ -1,10 +1,24 @@
 terraform {
   required_providers {
     yandex = {
-      source = "yandex-cloud/yandex"
+      source  = "yandex-cloud/yandex"
+      version = "~> 0.100"
     }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.4"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2"
     }
   }
   required_version = "~>1.12.0"
@@ -33,6 +47,21 @@ provider "aws" {
 
 data "aws_ssm_parameter" "iam_token" {
   name            = "/yandex/yc-iam-token"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "db_password" {
+  name            = "/terraform/db-password"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "s3_secret" {
+  name            = "/terraform/s3-secret"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "sa_key" {
+  name            = "/terraform/sa-key"
   with_decryption = true
 }
 
