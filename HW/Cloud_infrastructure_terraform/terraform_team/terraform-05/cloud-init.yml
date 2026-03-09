@@ -1,0 +1,21 @@
+#cloud-config
+ssh_pwauth: no
+users:
+  - name: ubuntu
+    homedir: /home/ubuntu
+    groups: sudo
+    shell: /bin/bash
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
+    ssh_authorized_keys:
+      - ${public_key}
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - nginx
+  - python3
+
+runcmd:
+  - systemctl enable nginx
+  - systemctl start nginx

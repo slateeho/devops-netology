@@ -16,3 +16,6 @@
 # own secret vars store.
 personal.auto.tfvars
 key.json
+**/key.json
+s3_keys.json
+**/s3_keys.json
