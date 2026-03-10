@@ -1,0 +1,35 @@
+stages:
+  - init
+  - apply
+  - destroy
+
+variables:
+  AWS_DEFAULT_REGION: eu-north-1
+
+before_script:
+  - apk add --no-cache aws-cli terraform
+  - export YC_TOKEN=$(aws ssm get-parameter --name "/yandex/yc-iam-token" --with-decryption --query 'Parameter.Value' --output text --region eu-north-1)
+  - export DB_PASSWORD=$(aws ssm get-parameter --name "/terraform/db-password" --with-decryption --query 'Parameter.Value' --output text --region eu-north-1)
+
+init:
+  stage: init
+  script:
+    - terraform init
+  tags:
+    - docker
+
+apply:
+  stage: apply
+  script:
+    - terraform apply -auto-approve
+  tags:
+    - docker
+  when: manual
+
+destroy:
+  stage: destroy
+  script:
+    - terraform destroy -auto-approve
+  tags:
+    - docker
+  when: manual
