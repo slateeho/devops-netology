@@ -1,10 +1,18 @@
-output "s3_access_key" {
-  value       = local.s3_keys.access_key.key_id
-  depends_on  = [local.s3_keys]
-}
+terraform {
+  backend "s3" {
+    bucket  = "lao-ush244oz"
+    key     = "terraform.tfstate"
+    region  = "ru-central1"
 
-output "s3_secret_key" {
-  value       = local.s3_keys.secret
-  sensitive   = true
-  depends_on  = [local.s3_keys]
+    use_lockfile = true
+
+    endpoints = {
+      s3 = "https://storage.yandexcloud.net"
+    }
+
+    skip_region_validation      = true
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
+  }
 }

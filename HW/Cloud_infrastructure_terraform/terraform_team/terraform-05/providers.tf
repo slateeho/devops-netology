@@ -1,30 +1,27 @@
 terraform {
   required_providers {
     yandex = {
-      source = "yandex-cloud/yandex"
+      source  = "yandex-cloud/yandex"
+      version = "~> 0.191"
     }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "2.7.0"
+    }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.3"
     }
   }
   required_version = "~>1.12.0"
-
-  backend "s3" {
-    bucket  = "lao-ush244oz"
-    key     = "terraform.tfstate"
-    region  = "ru-central1"
-
-    use_lockfile = true
-
-    endpoints = {
-      s3 = "https://storage.yandexcloud.net"
-    }
-
-    skip_region_validation      = true
-    skip_credentials_validation = true
-    skip_requesting_account_id  = true
-    skip_s3_checksum            = true
-  }
 }
 
 provider "aws" {
@@ -33,6 +30,11 @@ provider "aws" {
 
 data "aws_ssm_parameter" "iam_token" {
   name            = "/yandex/yc-iam-token"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "db_password" {
+  name            = "/terraform/db-password"
   with_decryption = true
 }
 

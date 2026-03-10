@@ -6,7 +6,6 @@ locals {
   cloud_init  = yamldecode(file("${path.module}/cloud-init.yml"))
   username    = local.cloud_init.users[0].name
   
-  s3_keys = jsondecode(file("${path.module}/s3_keys.json"))
   
   marketing_vm_flat = [
     for i, v in module.marketing_vm.all : {
@@ -45,24 +44,4 @@ variable "ha" {
   type        = bool
   default     = false
   description = "Enable high availability"
-}
-
-variable "s3_backend" {
-  type = map(any)
-  default = {
-    bucket                      = "lao-ush244oz"
-    key                         = "terraform.tfstate"
-    region                      = "ru-central1"
-    use_lockfile                = true
-    skip_region_validation      = true
-    skip_credentials_validation = true
-    skip_requesting_account_id  = true
-    skip_s3_checksum            = true
-  }
-}
-
-variable "yc_sync_sa" {
-  type        = string
-  default     = "s3-sync-sa"
-  description = "Service account name for S3"
 }

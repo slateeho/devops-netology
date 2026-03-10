@@ -43,10 +43,11 @@ module "db" {
     module.vpc_dev.subnet_ids["vpc_dev_a"],
     module.vpc_dev.subnet_ids["vpc_dev_b"]
   ]
+  security_group_id      = module.vpc_dev.security_group_id
   assign_public_ip       = false
   database_name          = "test"
   user_name              = "app"
-  user_password          = "password123"
+  user_password          = data.aws_ssm_parameter.db_password.value
   user_permissions       = [
     {
       database_name = "test"
