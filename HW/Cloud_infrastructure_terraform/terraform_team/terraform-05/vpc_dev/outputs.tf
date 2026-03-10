@@ -17,3 +17,7 @@ output "subnet_v4_cidr_blocks" {
 output "subnet_ids" {
   value = { for k, v in yandex_vpc_subnet.vpc_dev : k => v.id }
 }
+
+output "security_group_id" {
+  value = yandex_vpc_security_group.vpc_dev.id
+}

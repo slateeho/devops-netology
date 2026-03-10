@@ -1,15 +1,16 @@
 terraform {
   required_providers {
     yandex = {
-      source = "yandex-cloud/yandex"
+      source  = "yandex-cloud/yandex"
+      version = "~> 0.191"
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "~> 5.0"
     }
     template = {
       source  = "hashicorp/template"
-      version = "2.2.0"
+      version = "~> 2.2"
     }
   }
 }

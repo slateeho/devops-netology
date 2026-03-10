@@ -6,7 +6,6 @@ locals {
   cloud_init  = yamldecode(file("${path.module}/cloud-init.yml"))
   username    = local.cloud_init.users[0].name
   
-  s3_keys = jsondecode(file("${path.module}/s3_keys.json"))
   
   marketing_vm_flat = [
     for i, v in module.marketing_vm.all : {
