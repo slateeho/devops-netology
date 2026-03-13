@@ -1,35 +1,100 @@
+---
+image:
+  name: hashicorp/terraform:1.12.1
+  entrypoint:
+    - "/usr/bin/env"
+    - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+variables:
+  TF_ROOT: ${CI_PROJECT_DIR}/HW/Cloud_infrastructure_terraform/terraform_team/terraform-05
+  TF_LOG: WARN
+  TF_TIMEOUT: "-lock-timeout=600s"
+  TF_PLAN_NAME: plan.tfplan
+  TF_PLAN_JSON: plan.json
+  REFRESH: -refresh=true
+  ENVIRONMENT_NAME: "prod"
+  CI_SERVER_URL: http://172.18.0.2:8929
+  CI_SERVER_HOST: 172.18.0.2:8929
+  GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_CONCURRENT_ID}/${CI_PROJECT_PATH}
+  GIT_DEPTH: "0"
+  STATE_BUCKET: "lao-ush244oz"
+  STATE_KEY: "terraform.tfstate"
+
+before_script:
+  - rm -rf $TF_ROOT/.terraform
+  - /sbin/apk add --no-cache bash curl git wget openssh
+  - echo "nameserver 8.8.8.8" > /etc/resolv.conf
+  - echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+  - git config --global url."http://172.18.0.2:8929/".insteadOf "http://localhost:8929/"
+  - git config --global url."https://".insteadOf "git://"
+  - cd $TF_ROOT
+  - rm -f .terraform.lock.hcl
+  - chmod -R 777 /tmp
+  - terraform version
+  - curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+  - /root/yandex-cloud/bin/yc config set token "$YC_TOKEN"
+  - echo "ACCESS_KEY len=${#ACCESS_KEY} SECRET_KEY len=${#SECRET_KEY}"
+  - terraform init -upgrade -backend-config="access_key=$ACCESS_KEY" -backend-config="secret_key=$SECRET_KEY" -backend-config="bucket=$STATE_BUCKET" -backend-config="key=$STATE_KEY"
+
+cache:
+  key: "$CI_COMMIT_SHA"
+  paths:
+    - $TF_ROOT/.terraform
+  policy: pull-push
+
 stages:
-  - init
+  - validate
+  - plan
   - apply
   - destroy
 
-variables:
-  AWS_DEFAULT_REGION: eu-north-1
-
-before_script:
-  - apk add --no-cache aws-cli terraform
-  - export YC_TOKEN=$(aws ssm get-parameter --name "/yandex/yc-iam-token" --with-decryption --query 'Parameter.Value' --output text --region eu-north-1)
-  - export DB_PASSWORD=$(aws ssm get-parameter --name "/terraform/db-password" --with-decryption --query 'Parameter.Value' --output text --region eu-north-1)
-
-init:
-  stage: init
-  script:
-    - terraform init
+tf-fmt:
+  stage: validate
   tags:
-    - docker
+    - aaa
+  script:
+    - terraform fmt -recursive
+
+validate:
+  stage: validate
+  tags:
+    - aaa
+  script:
+    - terraform validate
+
+plan:
+  stage: plan
+  tags:
+    - aaa
+  dependencies:
+    - validate
+  script:
+    - cd $TF_ROOT
+    - /sbin/apk add --no-cache jq
+    - terraform plan -out=$TF_PLAN_NAME $REFRESH
+    - terraform show --json $TF_PLAN_NAME | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > $TF_PLAN_JSON
+  artifacts:
+    name: plan
+    paths:
+      - ${TF_ROOT}/$TF_PLAN_NAME
+    reports:
+      terraform: ${TF_ROOT}/$TF_PLAN_JSON
+    expire_in: 7 days
 
 apply:
   stage: apply
-  script:
-    - terraform apply -auto-approve
   tags:
-    - docker
-  when: manual
+    - aaa
+  dependencies:
+    - plan
+  script:
+    - cd $TF_ROOT
+    - terraform apply -auto-approve $TF_PLAN_NAME
 
 destroy:
   stage: destroy
-  script:
-    - terraform destroy -auto-approve
   tags:
-    - docker
-  when: manual
+    - aaa
+  script:
+    - cd $TF_ROOT
+    - terraform destroy -auto-approve

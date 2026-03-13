@@ -6,24 +6,11 @@ resource "local_file" "hosts_ini" {
     username                = local.username
     private_key             = local.private_key
   })
-  filename = "${path.module}/ansible/hosts.ini"
+  filename = "${path.module}/ansible/hosts.ini" 
 }
 
 resource "null_resource" "cloud_init_wait" {
   depends_on = [module.marketing_vm, module.analytics_vm]
-
-  provisioner "remote-exec" {
-    inline = [
-      "cloud-init status --wait"
-    ]
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(local.private_key)
-      host        = module.marketing_vm.external_ip_address[0]
-    }
-  }
 }
 
 resource "null_resource" "nginx_test" {

@@ -1,8 +1,8 @@
 ###cloud vars
 
 locals {
-  public_key  = trimspace(file("/home/a/.ato4ka/security/.ssh/id_ed25519.pub"))
-  private_key = "/home/a/.ato4ka/security/.ssh/id_ed25519"
+  public_key  = trimspace(file("${path.module}/id_ed25519.pub"))
+  private_key = "${path.module}/id_ed25519"
   cloud_init  = yamldecode(file("${path.module}/cloud-init.yml"))
   username    = local.cloud_init.users[0].name
   
@@ -64,5 +64,23 @@ variable "s3_backend" {
 variable "yc_sync_sa" {
   type        = string
   default     = "s3-sync-sa"
-  description = "Service account name for S3"
+  description = "Service account SA name"
+}
+
+variable "bucket_name" {
+  type        = string
+  default     = "lao-ush244oz"
+  description = "TF remote STATE_BUCKET"
+}
+
+variable "public_key_content" {
+  type        = string
+  default     = ""
+  description = "Public key content (optional, uses local file if empty)"
+}
+
+variable "private_key_path" {
+  type        = string
+  default     = ""
+  description = "Private key path (optional, uses local file if empty)"
 }
