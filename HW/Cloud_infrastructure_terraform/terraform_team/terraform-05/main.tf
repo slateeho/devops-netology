@@ -38,7 +38,7 @@ module "marketing_vm" {
   metadata = {
     user-data          = data.template_file.cloudinit.rendered
     serial-port-enable = 1
-    ssh-keys           = "ubuntu:${trimspace(file("/home/a/.ato4ka/security/.ssh/id_ed25519.pub"))}"
+    ssh-keys           = "ubuntu:${trimspace(local.public_key)}"
   }
 }
 
@@ -62,7 +62,7 @@ module "analytics_vm" {
   metadata = {
     user-data          = data.template_file.cloudinit.rendered
     serial-port-enable = 1
-    ssh-keys           = "ubuntu:${trimspace(file("/home/a/.ato4ka/security/.ssh/id_ed25519.pub"))}"
+    ssh-keys           = "ubuntu:${trimspace(local.public_key)}"
   }
 }
 
