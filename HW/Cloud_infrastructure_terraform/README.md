@@ -473,16 +473,6 @@ develop-webs-0 ru-central1-a fhmhkl0si359stsebd16 RUNNING
 
 </details>
 
-### Задание 6*
-
-CI/CD конфигурация: [.gitlab-ci.yml](task_6/.gitlab-ci.yml)
-
-![CI/CD Pipeline](terraform_team/pngs/6.png)
-
-
-### Задание 7*
-
-![CI/CD Pipeline Jobs](terraform_team/pngs/7.png)
 
 </details>
->>>>>>> terraform-05
+
