@@ -12,3 +12,9 @@ devops-netology
 ## [Облачная инфраструктура. Terraform](./HW/Cloud_infrastructure_terraform/README.md)
 
 * 9 февраля — 20 февраля
+
+## [Система управления конфигурациями](./HW/Configuration_management/README.md)
+
+* 4 марта — 22 марта
+
+
