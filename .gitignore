@@ -15,3 +15,112 @@
 
 # own secret vars store.
 personal.auto.tfvars
+# Terraform variables
+*.tfvars
+*.tfvars.json
+
+# Terraform overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform lock info
+.terraform.tfstate.lock.info
+
+# Terraform CLI configuration
+.terraformrc
+terraform.rc
+
+# own secret vars store.
+personal.auto.tfvars
+**/personal.auto.tfvars
+key.json
+**/key.json
+s3_keys.json
+**/s3_keys.json
+
+# SSH keys
+**/id_ed25519
+**/id_ed25519.pub
+id_ed25519
+id_ed25519.pub
+
+# Vault password files
+.vault_pass
+.vault_password
+*.vault
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# UV
+uv.lock
+
+# poetry
+poetry.lock
+poetry.toml
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ansible
+*.retry
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
