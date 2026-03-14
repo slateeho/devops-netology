@@ -41,15 +41,17 @@
 }
 ```
 При удалении ресурсов docker image будет сохраняться локально, поскольку "keep_locally = true", а при указании обратного - удаляться, что следует из описания ресурса docker провайдера  `docker_image:
-
+:q
 `• keep_locally (Boolean) If true, then the Docker image won't be deleted on destroy operation.`
 
 ## Задание 2
 
-Проверка Env в remote docker context на созданной ВМ:
 
-![Введение в Terraform](terraform_intro/4.png)
-
+П
+:роверка Env в remote docker context на созданной ВМ:
+:
+![Введеeeние в Terraform](terraform_intro/4.png)
+q
 ## Задание 3
 
 Opentofu init \ apply в yandex и docker remote директориях:
@@ -60,7 +62,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 <details>
 <summary>02. Основы Terraform. Yandex Cloud</summary>
 
-## Задание 1
+##
 
 В коде были выявлены следующие синтактические ошибки:
 
@@ -69,7 +71,8 @@ Opentofu init \ apply в yandex и docker remote директориях:
 - необходимо указать  дефолтные значения yc cloud_id/fodler_id,
 - неверный  platform_id ('standart-v4' -> 'standatd-v3')
 
-Опции Preemptable = true и использьвание 20% CPU позволяет экономить денежные средства, уменьшая их потребление путем снижения как платы за CPU, так и позволяя автоматически выключать неиспользуемую виртуальную машину, снижая расход до нуля  
+
+Опции Preemptable = true и использьвание 20% CPU позволяет экономить денежные средства, уменьшая их потребление путем снижения как платы за CPU, так и позволяя автоматически выключать неиспользуемую виртуальную машину, снижая расход до нуля
 
 ![Основы в Terraform](terraform_basics/task_1/pngs/1.png)
 
@@ -81,7 +84,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 
 ## Задание 5-6
 
-Задание выполнено в коде папки `terraform_basics`
+Задание выполне:wqно в коде папки `terraform_basics`
 
 ### Задание 7*
 
@@ -96,3 +99,50 @@ Opentofu init \ apply в yandex и docker remote директориях:
 ![Основы в Terraform](terraform_basics/task_1/pngs/9.png)
 
 </details>
+
+<details>
+<summary>03. Управляющие конструкции в коде Terraform Основы Terraform.</summary>
+
+### Задание 1
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/1.png)
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/2.png)
+
+### Задания 2-4
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4.png)
+
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4_1.png)
+
+![Основы в expectTerraform](terraform_control_constructs/terraform-03/pngs/4.png)
+
+
+### Заданиe 5*
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
+
+
+### Заданиe 5*
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
+
+
+### Заданиe 6*
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/6.png)
+
+
+### Заданиe 7*
+
+Решение находится в папке `terraform_control_constructs/terraform-03/task_7_asterisk`
+
+
+### Заданиe 8*
+
+Решение находится  в `terraform_control_constructs/task_6_asterisk/hosts.tftpl`
+
+### Заданиe 9*
+
+![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/9.png)
