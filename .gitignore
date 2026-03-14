@@ -12,9 +12,9 @@
 *.tfstate
 *.tfstate.*
 
-
 # own secret vars store.
 personal.auto.tfvars
+<<<<<<< HEAD
 # Terraform variables
 *.tfvars
 *.tfvars.json
@@ -34,6 +34,8 @@ terraform.rc
 
 # own secret vars store.
 personal.auto.tfvars
+=======
+>>>>>>> terraform-05
 **/personal.auto.tfvars
 key.json
 **/key.json
@@ -44,6 +46,7 @@ s3_keys.json
 **/id_ed25519
 **/id_ed25519.pub
 id_ed25519
+<<<<<<< HEAD
 id_ed25519.pub
 
 # Vault password files
@@ -124,3 +127,6 @@ Thumbs.db
 
 # Logs
 *.log
+=======
+id_ed25519.pub
+>>>>>>> terraform-05
