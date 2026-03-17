@@ -3,9 +3,8 @@
 Ansible role to install and configure Vector log aggregator and Clickhouse database on Linux systems.
 
 Vector supports multiple installation modes:
-- **Docker container**
+- **Docker container** or **Kubernetes Vector via Helm**
 - **Host system**
-- **Kubernetes via Helm**
 
 Clickhouse supports RPM and Arch Linux distributions.
 
@@ -33,7 +32,6 @@ This repository README is split into two parallel blocks — one for Vector and 
 - [Tags](#vector-tags)
 - [Requirements](#vector-requirements)
 - [Default Variables](#vector-default-variables)
-- [Dependencies](#vector-dependencies)
 
 ### Installation
 
