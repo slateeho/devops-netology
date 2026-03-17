@@ -19,12 +19,17 @@
 
 <details>
 
-<summary>2. Работа с PLaybook</summary>
+<summary>2. Работа с Playbook</summary>
 
 # Основная часть
 
 ![](Ansible_playbook/pngs/1.png)
 
 ![](Ansible_playbook/pngs/2.png)
+
+![](Ansible_playbook/pngs/3.png)
+
+[README.md по ролям `Clickhouse` и  `Vector`](Ansible_playbook/main_task/README.md)
+
 
 </details>
