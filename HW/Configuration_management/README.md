@@ -16,3 +16,15 @@
 - [Скрипт на Python](./Ansible_intro/additional_task/install_python_logged.py)
 
 </details>
+
+<details>
+
+<summary>2. Работа с PLaybook</summary>
+
+# Основная часть
+
+![](Ansible_playbook/pngs/1.png)
+
+![](Ansible_playbook/pngs/2.png)
+
+</details>
