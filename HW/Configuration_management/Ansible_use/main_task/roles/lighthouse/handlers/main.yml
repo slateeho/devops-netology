@@ -1,0 +1,9 @@
+---
+# handlers file for lighthouse-role
+- name: Start nginx service
+  become: true
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    masked: false
+    state: started

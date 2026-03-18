@@ -1,0 +1,14 @@
+---
+
+- name: Nginx - Copy site config
+  become: true
+  ansible.builtin.template:
+    src: default.conf.j2
+    dest: "{{ clickhouse_config_path | default(\"/etc/nginx/conf.d/default.conf\") }}"
+    mode: '0755'
+  notify: Start nginx service
+  tags: lighthouse
+
+- name: Nginx - Flush handlers
+  ansible.builtin.meta: flush_handlers
+  tags: lighthouse

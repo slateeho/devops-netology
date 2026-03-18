@@ -1,0 +1,21 @@
+server {
+    listen       80;
+    server_name  localhost;
+
+    access_log  {{ clickhouse_access_log | default("/var/log/nginx/access.log main") }};
+    error_log   {{ clickhouse_error_log | default("/var/log/nginx/error.log warn") }};
+
+    location / {
+        root   {{ clickhouse_www_path | default("/var/www/lighthouse") }};
+        index  index.html index.htm;
+
+        # Basic auth for ClickHouse
+        auth_basic "ClickHouse";
+        auth_basic_user_file {{ clickhouse_htpasswd_file | default("/etc/nginx/.htpasswd") }};
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   {{ clickhouse_www_path | default("/var/www/lighthouse") }};
+    }
+}

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  ansible:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ANSIBLE_CORE_VERSION: 2.16.0
+        ANSIBLE_VERSION: 9.3.0
+        ANSIBLE_LINT: 6.22.0
+    container_name: clickhouse-ansible
+    volumes:
+      - /home/a/old/clickhouse:/ansible
+    working_dir: /ansible
+    stdin_open: true
+    tty: true
+    command: /bin/bash
