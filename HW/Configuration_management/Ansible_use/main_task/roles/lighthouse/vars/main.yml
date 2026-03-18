@@ -1,0 +1,14 @@
+---
+clickhouse_www_path: /var/www/lighthouse
+clickhouse_git_url: https://github.com/VKCOM/lighthouse.git
+clickhouse_config_path: /etc/nginx/conf.d/default.conf
+clickhouse_access_log: /var/log/nginx/access.log main
+clickhouse_error_log: /var/log/nginx/error.log warn
+clickhouse_htpasswd_file: /etc/nginx/.htpasswd
+
+clickhouse_host: localhost
+clickhouse_port: 9000
+clickhouse_http_port: 8123
+clickhouse_database: logs
+clickhouse_user: default
+clickhouse_password: password

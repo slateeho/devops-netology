@@ -1,0 +1,5 @@
+{
+  "host": "{{ clickhouse_host | default('localhost') }}",
+  "port": {{ clickhouse_port | default(9000) }},
+  "database": "{{ clickhouse_database | default('logs') }}"
+}

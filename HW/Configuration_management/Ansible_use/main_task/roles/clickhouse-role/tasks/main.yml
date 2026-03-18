@@ -1,0 +1,64 @@
+---
+- name: Get clickhouse distrib
+  when: ansible_facts['os_family'] == "RedHat"
+  tags:
+    - clickhouse
+  block:
+    - name: Download clickhouse packages
+      ansible.builtin.get_url:
+        url: "https://packages.clickhouse.com/rpm/stable/{{ item }}-{{ clickhouse_version }}.x86_64.rpm"
+        dest: "./{{ item }}-{{ clickhouse_version }}.rpm"
+        mode: '0644'
+      with_items: "{{ clickhouse_packages }}"
+      tags:
+        - clickhouse
+  rescue:
+    - name: Get clickhouse distrib fallback
+      ansible.builtin.get_url:
+        url: "https://packages.clickhouse.com/rpm/stable/clickhouse-common-static-{{ clickhouse_version }}.x86_64.rpm"
+        dest: "./clickhouse-common-static-{{ clickhouse_version }}.rpm"
+        mode: '0644'
+      tags:
+        - clickhouse
+
+- name: Install clickhouse packages (RPM)
+  become: true
+  tags:
+    - clickhouse
+  ansible.builtin.dnf:
+    name:
+      - clickhouse-common-static-{{ clickhouse_version }}.rpm
+      - clickhouse-client-{{ clickhouse_version }}.rpm
+      - clickhouse-server-{{ clickhouse_version }}.rpm
+  notify: Start clickhouse service
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Install clickhouse (Arch)
+  community.general.pacman:
+    name: clickhouse
+    state: present
+  when: ansible_facts['os_family'] == "Archlinux"
+  notify: Start clickhouse service
+  tags:
+    - clickhouse
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - clickhouse
+
+- name: Wait for clickhouse to be ready
+  ansible.builtin.wait_for:
+    port: 9000
+    delay: 2
+    timeout: 30
+  tags:
+    - clickhouse
+
+- name: Create database
+  ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
+  register: create_db
+  failed_when: create_db.rc != 0 and create_db.rc != 82
+  changed_when: create_db.rc == 0
+  tags:
+    - clickhouse
