@@ -33,3 +33,18 @@
 
 
 </details>
+
+</details>
+
+<details>
+
+<summary>3. Использование Ansible</summary>
+
+# Основная часть
+
+[README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_use/main_task/README.md)
+
+[08-ansible-03-yandex tag](https://github.com/slateeho/devops-netology/releases/tag/08-ansible-03-yandex)
+
+
+</details>
