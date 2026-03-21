@@ -60,7 +60,7 @@
 
 ![](Ansible_roles/pngs/2.png)
 
-[08-ansible-03-yandex tag](https://github.com/slateeho/devops-netology/releases/tag/08-ansible-03-yandex)
+[v.1.0.3](https://github.com/slateeho/devops-netology/commit/657c0dc3954516b7d7ed849b67e250d721d360b3)
 
 
 </details>
