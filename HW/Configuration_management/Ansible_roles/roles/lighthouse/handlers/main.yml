@@ -1,0 +1,17 @@
+---
+# handlers file for lighthouse-role
+- name: Start nginx service
+  become: true
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    masked: false
+    state: started
+  when: systemd_running | default(false)
+
+- name: Start nginx service (init.d)
+  become: true
+  ansible.builtin.shell: |
+    /etc/init.d/nginx start || nginx
+  when: not (systemd_running | default(false))
+  changed_when: true

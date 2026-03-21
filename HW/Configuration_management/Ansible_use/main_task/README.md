@@ -86,7 +86,7 @@ ansible-playbook -i inventory/prod.yml site.yml --tags vector
 
 #### Installation Modes
 
-Configure the installation mode in `roles/vector-role/vars/main.yml`:
+Configure the installation mode in `roles/vector_role/vars/main.yml`:
 
 - **Docker mode** (`docker: true`): Deploys Vector as a Docker container using docker-compose.
 - **Host mode** (`docker: false`): Installs Vector directly on the host system.

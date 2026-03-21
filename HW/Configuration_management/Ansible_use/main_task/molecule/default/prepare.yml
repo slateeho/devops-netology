@@ -1,0 +1,81 @@
+---
+- name: Prepare container instances
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Run python install script
+      ansible.builtin.command: python3 /home/a/PY/install_python_logged.py
+      register: python_install_output
+      changed_when: false
+
+    - name: Display python install script output
+      ansible.builtin.debug:
+        msg: "{{ python_install_output.stdout_lines }}"
+
+- name: Install dependencies in containers
+  hosts: all:!localhost
+  gather_facts: true
+  tasks:
+    - name: Install sudo and wget on Debian/Ubuntu
+      ansible.builtin.apt:
+        name:
+          - sudo
+          - wget
+          - curl
+          - git
+          - systemd
+        state: present
+        update_cache: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install sudo and wget on CentOS
+      ansible.builtin.raw: dnf install -y python3-dnf systemd sudo wget curl git
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Install sudo and wget on Fedora
+      ansible.builtin.dnf:
+        name:
+          - sudo
+          - wget
+          - curl
+          - git
+          - systemd
+        state: present
+      when: ansible_facts['distribution'] == "Fedora"
+
+    - name: Install sudo and wget on Arch
+      community.general.pacman:
+        name:
+          - sudo
+          - wget
+          - curl
+          - git
+          - systemd
+        state: present
+      when: ansible_facts['os_family'] == "Archlinux"
+
+    - name: Create /var/run directory
+      ansible.builtin.file:
+        path: /var/run
+        state: directory
+        mode: '0755'
+
+    - name: Create pid file directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      loop:
+        - /var/run
+        - /var/log
+      failed_when: false
+
+    - name: Set /var/run permissions
+      ansible.builtin.file:
+        path: /var/run
+        mode: '1777'
+        state: directory
+      failed_when: false
+

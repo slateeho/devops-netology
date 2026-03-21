@@ -1,0 +1,73 @@
+---
+# Installation mode - DEFAULTS (can be overridden)
+vector_user: "centos"
+docker: false
+helm: false
+
+# Vector installation - DEFAULTS
+vector_version: "0.54.0"
+vector_prefix: "/usr/local"
+vector_config_dir: /etc/vector
+vector_log_dir: /var/log/vector
+vector_bin: "/usr/bin/vector"
+
+# Vector resource limits - Docker - DEFAULTS
+docker_memory_limit: "512m"
+docker_cpu_limit: "0.5"
+
+# Vector resource limits - Systemd - DEFAULTS
+systemd_memory_max: "512m"
+systemd_memory_high: "400m"
+systemd_memory_swap_max: "0"
+systemd_cpu_quota: "50%"
+systemd_cpu_weight: "100"
+
+# Docker - DEFAULTS
+docker_buildx_version: "0.17.0"
+docker_buildx_url: "https://github.com/docker/buildx/releases/download/v{{ docker_buildx_version }}/buildx-v{{ docker_buildx_version }}.linux-amd64"
+docker_buildx_path: "~/.docker/cli-plugins/docker-buildx"
+
+# Vector installation URLs - DEFAULTS
+vector_install_script: "https://sh.vector.dev"
+vector_setup_script: "https://yum.vector.dev/stable/vector-0/x86_64/vector-{{ vector_version }}-1.x86_64.rpm"
+
+# Log file paths - DEFAULTS
+syslog_files:
+  - /var/log/syslog
+  - /var/log/auth.log
+  - /var/log/kern.log
+
+nginx_access_logs:
+  - /var/log/nginx/*access*.log
+
+nginx_error_logs:
+  - /var/log/nginx/*error*.log
+
+postgres_logs:
+  - /var/log/postgresql/postgresql-*.log
+  - /var/log/postgresql/*.log
+
+redis_logs:
+  - /var/log/redis/redis-server*.log
+  - /var/log/redis/*.log
+
+docker_logs:
+  - /var/lib/docker/containers/*/*.log
+
+k8s_logs:
+  - /var/log/containers/*.log
+  - /var/log/pods/*/*.log
+
+# Remote endpoints - DEFAULTS
+loki_endpoint: "http://loki.example.local:3100/loki/api/v1/push"
+loki_port: "3100"
+elasticsearch_endpoint: "http://es.example.local:9200"
+elasticsearch_port: "9200"
+
+# Telemetry - DEFAULTS
+telemetry_address: "0.0.0.0:8686"
+telemetry_port: "8686"
+
+# Docker volumes - DEFAULTS
+vector_config_volume: vector_config
+vector_logs_volume: vector_logs

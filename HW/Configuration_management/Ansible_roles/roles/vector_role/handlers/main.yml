@@ -1,0 +1,16 @@
+---
+- name: Restart vector service
+  become: true
+  ansible.builtin.systemd:
+    name: vector
+    state: restarted
+    daemon_reload: true
+  when: not (docker | default(false)) and systemd_running | default(false)
+
+- name: Restart vector service (init.d)
+  become: true
+  ansible.builtin.sysvinit:
+    name: vector
+    state: restarted
+    enabled: yes
+  when: not (docker | default(false)) and not (systemd_running | default(false))

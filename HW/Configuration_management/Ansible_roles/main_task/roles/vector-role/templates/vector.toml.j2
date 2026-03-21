@@ -1,0 +1,71 @@
+# vector.toml - central example
+# Run-time: adapt addresses, credentials, and enable/disable sources per environment
+
+# Sources
+[sources.debian_syslog]
+type = "file"
+include = ["/var/log/syslog", "/var/log/auth.log", "/var/log/kern.log"]
+ignore_older = 86400
+fingerprint_bytes = 256
+read_from = "beginning"
+
+[sources.journald]
+type = "journald"
+include_units = []
+
+[sources.nginx_access]
+type = "file"
+include = ["/var/log/nginx/*access*.log"]
+ignore_older = 86400
+read_from = "beginning"
+
+[sources.nginx_error]
+type = "file"
+include = ["/var/log/nginx/*error*.log"]
+ignore_older = 86400
+read_from = "beginning"
+
+# Transforms
+[transforms.parse_nginx_access]
+type = "remap"
+inputs = ["nginx_access"]
+source = '''
+nginx = parse_regex!(.message, r'(?P<client>[^ ]+) [^ ]+ [^ ]+ \\[(?P<time>[^\\]]+)\\] "(?P<method>[^ ]+) (?P<path>[^ ]+) [^"]+" (?P<status>\\d{3}) (?P<size>\\d+|-) "(?P<referer>[^"]*)" "(?P<agent>[^"]*)"')
+if nginx != null {
+  .client = nginx.client
+  .method = nginx.method
+  .path = nginx.path
+  .status = nginx.status
+}
+'''
+
+# Sinks
+[sinks.console]
+type = "console"
+inputs = ["debian_syslog"]
+encoding.codec = "json"
+
+[sinks.file]
+type = "file"
+inputs = ["debian_syslog"]
+path = "{{ vector_output_log }}"
+encoding.codec = "json"
+
+# [sinks.loki]
+# type = "http"
+# inputs = ["debian_syslog"]
+# uri = "{{ loki_endpoint }}"
+# compression = "gzip"
+# encoding.codec = "json"
+
+# [sinks.elasticsearch]
+# type = "elasticsearch"
+# inputs = ["debian_syslog"]
+# endpoint = "{{ elasticsearch_endpoint }}"
+# mode = "normal"
+
+# Telemetry
+[telemetry]
+enabled = true
+address = "{{ telemetry_address }}"
+

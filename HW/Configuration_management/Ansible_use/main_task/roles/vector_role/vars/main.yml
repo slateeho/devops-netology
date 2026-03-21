@@ -1,0 +1,4 @@
+---
+# Role-specific constants (not meant to be overridden)
+ansible_roles_dir: /tmp/modules/Git/devops-netology/HW/Configuration_management/Ansible_roles/main_task
+ansible_playbook_dir: /tmp/modules/Git/devops-netology/HW/Configuration_management/Ansible_playbook/main_task

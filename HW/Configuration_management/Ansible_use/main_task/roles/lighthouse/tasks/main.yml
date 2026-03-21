@@ -1,12 +1,22 @@
 ---
 - name: Include ClickHouse variables
-  ansible.builtin.include_vars: "{{ role_path }}/../clickhouse-role/vars/main.yml"
+  ansible.builtin.include_vars: "{{ role_path }}/../clickhouse_role/vars/main.yml"
   tags:
     - always
 
 - name: Install packages
   ansible.builtin.include_tasks: yum.yml
   tags: [always]
+
+- name: Create nginx user if not exists
+  become: true
+  ansible.builtin.user:
+    name: nginx
+    state: present
+    shell: /bin/bash
+  failed_when: false
+  tags:
+    - always
 
 - name: Lighthouse - Create directory
   become: true
@@ -16,6 +26,11 @@
     mode: '0755'
     owner: nginx
     group: nginx
+  tags: lighthouse
+
+- name: Configure git safe directory
+  ansible.builtin.raw: git config --global --add safe.directory {{ clickhouse_www_path }}
+  become: true
   tags: lighthouse
 
 - name: Lighthouse - clone repo
@@ -59,4 +74,16 @@
       echo "{{ clickhouse_password }}" | openssl passwd -stdin >> {{ clickhouse_htpasswd_file }}
   args:
     creates: "{{ clickhouse_htpasswd_file }}"
+  tags: lighthouse
+
+- name: Check Lighthouse HTTP status
+  ansible.builtin.shell: curl -s -o /dev/null -w "\n\n%{http_code}\n" http://localhost:8123
+  register: clickhouse_response
+  failed_when: false
+  changed_when: false
+  tags: lighthouse
+
+- name: Display Lighthouse HTTP response with status code
+  ansible.builtin.debug:
+    msg: "{{ clickhouse_response.stdout.splitlines() }}"
   tags: lighthouse

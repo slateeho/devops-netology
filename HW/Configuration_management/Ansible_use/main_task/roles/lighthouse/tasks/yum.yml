@@ -13,6 +13,7 @@
       enabled=1
       gpgkey=https://nginx.org/keys/nginx_signing.key
       module_hotfixes=true
+  when: ansible_facts['os_family'] == "RedHat"
   tags: lighthouse
 
 - name: Yum - Install packages
@@ -22,4 +23,5 @@
       - git
       - nginx
     state: present
+  when: ansible_facts['os_family'] == "RedHat"
   tags: lighthouse

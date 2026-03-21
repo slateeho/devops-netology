@@ -1,0 +1,46 @@
+---
+all:
+  children:
+    clickhouse:
+      hosts:
+        debian:
+          ansible_host: debian
+          container_image: debian:12
+          container_command: /sbin/init
+          container_privileged: true
+        ubuntu:
+          ansible_host: ubuntu
+          container_image: ubuntu:22.04
+          container_command: /sbin/init
+          container_privileged: true
+        centos:
+          ansible_host: centos
+          container_image: centos:8
+          container_command: /sbin/init
+          container_privileged: true
+        fedora:
+          ansible_host: fedora
+          container_image: fedora:39
+          container_command: /sbin/init
+          container_privileged: true
+        arch:
+          ansible_host: arch
+          container_image: archlinux:latest
+          container_command: /sbin/init
+          container_privileged: true
+      vars: {}
+    vector:
+      hosts:
+        debian:
+          ansible_host: debian
+        ubuntu:
+          ansible_host: ubuntu
+        centos:
+          ansible_host: centos
+        fedora:
+          ansible_host: fedora
+        arch:
+          ansible_host: arch
+      vars:
+        vector_log_dir: /var/log/vector
+        vector_config_dir: /etc/vector

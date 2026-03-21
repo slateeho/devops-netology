@@ -1,0 +1,9 @@
+[sources.logs]
+type = "file"
+include = ["/var/log/messages"]
+read_from = "beginning"
+
+[sinks.console]
+type = "console"
+inputs = ["logs"]
+encoding.codec = "json"

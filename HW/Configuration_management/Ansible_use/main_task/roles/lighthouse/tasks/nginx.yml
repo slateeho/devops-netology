@@ -1,12 +1,91 @@
 ---
 
-- name: Nginx - Copy site config
+- name: Remove pacman lock file
+  become: true
+  ansible.builtin.file:
+    path: /var/lib/pacman/db.lck
+    state: absent
+  ignore_errors: true
+  tags: lighthouse
+
+- name: Create nginx group
+  become: true
+  ansible.builtin.group:
+    name: nginx
+    state: present
+    system: yes
+  tags: lighthouse
+
+- name: Create nginx user
+  become: true
+  ansible.builtin.user:
+    name: nginx
+    shell: /usr/sbin/nologin
+    home: /var/cache/nginx
+    createhome: no
+    group: nginx
+  tags: lighthouse
+
+- name: Install nginx
+  become: true
+  ansible.builtin.package:
+    name: nginx
+    state: present
+  tags: lighthouse
+
+- name: Create nginx conf.d directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/nginx/conf.d
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  tags: lighthouse
+
+- name: Create nginx config
   become: true
   ansible.builtin.template:
     src: default.conf.j2
-    dest: "{{ clickhouse_config_path | default(\"/etc/nginx/conf.d/default.conf\") }}"
-    mode: '0755'
+    dest: /etc/nginx/conf.d/default.conf
+    mode: '0644'
   notify: Start nginx service
+  tags: lighthouse
+
+- name: Create nginx systemd unit
+  become: true
+  ansible.builtin.template:
+    src: nginx.service.j2
+    dest: /etc/systemd/system/nginx.service
+    mode: '0644'
+  when: ansible_service_mgr == "systemd"
+  tags: lighthouse
+
+- name: Create nginx init.d script
+  become: true
+  ansible.builtin.template:
+    src: nginx.init.j2
+    dest: /etc/init.d/nginx
+    mode: '0755'
+  when: ansible_service_mgr != "systemd"
+  tags: lighthouse
+
+- name: Start and enable nginx (systemd)
+  become: true
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: yes
+    state: started
+  when: ansible_service_mgr == "systemd"
+  tags: lighthouse
+
+- name: Start and enable nginx (init.d)
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    enabled: yes
+    state: started
+  when: ansible_service_mgr != "systemd"
   tags: lighthouse
 
 - name: Nginx - Flush handlers
