@@ -56,10 +56,6 @@
 
 [README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/README.md)
 
-![](Ansible_roles/pngs/1.png)
-
-![](Ansible_roles/pngs/2.png)
-
 [v.1.0.3](https://github.com/slateeho/devops-netology/commit/657c0dc3954516b7d7ed849b67e250d721d360b3)
 
 
