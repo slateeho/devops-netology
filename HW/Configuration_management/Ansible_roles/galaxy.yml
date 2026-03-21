@@ -1,0 +1,20 @@
+---
+namespace: slateeho
+name: infrastructure
+version: 1.0.3
+readme: README.md
+authors:
+  - LAO
+description: Ansible roles for ClickHouse, Vector, and Lighthouse on with molecule testing on Arch, Debian, Centos 8, Fedora, Ubuntu.
+license:
+  - MIT
+repository: https://github.com/slateeho/devops-netology
+documentation: https://github.com/slateeho/devops-netology/tree/main/HW/Configuration_management/Ansible_use/main_task
+issues: https://github.com/slateeho/devops-netology/issues
+tags:
+  - clickhouse
+  - vector
+  - lighthouse
+  - centos7
+  - logging
+  - analytics

@@ -1,0 +1,5 @@
+---
+nginx_user: www-data
+nginx_conf_dir: /etc/nginx/sites-enabled
+nginx_conf_file: /etc/nginx/sites-enabled/lighthouse.conf
+nginx_default_root: /var/www/html

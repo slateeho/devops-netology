@@ -1,0 +1,50 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          vector
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Vector data pipeline
+### END INIT INFO
+
+DAEMON={{ vector_bin }}
+PIDFILE=/var/run/vector.pid
+NAME=vector
+CONFIG={{ vector_config_dir }}/vector.toml
+
+[ -x "$DAEMON" ] || exit 0
+
+case "$1" in
+  start)
+    echo "Starting $NAME"
+    $DAEMON -c "$CONFIG" &
+    echo $! > "$PIDFILE"
+    ;;
+  stop)
+    echo "Stopping $NAME"
+    [ -f "$PIDFILE" ] && kill $(cat "$PIDFILE") 2>/dev/null
+    rm -f "$PIDFILE"
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  reload)
+    [ -f "$PIDFILE" ] && kill -HUP $(cat "$PIDFILE") 2>/dev/null
+    ;;
+  status)
+    if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE") 2>/dev/null; then
+      echo "$NAME is running"
+    else
+      echo "$NAME is not running"
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload|status}"
+    exit 1
+    ;;
+esac
+exit 0

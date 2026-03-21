@@ -1,0 +1,51 @@
+---
+- name: Destroy container instances
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Stop services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - clickhouse-server
+        - vector
+      ignore_errors: true
+
+    - name: Remove configuration directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/clickhouse-server
+        - /etc/vector
+        - /var/lib/clickhouse
+        - /var/lib/vector
+      ignore_errors: true
+
+    - name: Remove packages
+      become: true
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - clickhouse
+        - vector
+      ignore_errors: true
+
+    - name: Clean up systemd units
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/systemd/system/clickhouse-server.service
+        - /etc/systemd/system/vector.service
+      ignore_errors: true
+
+    - name: Reload systemd
+      become: true
+      ansible.builtin.systemd:
+        daemon_reload: true
+      ignore_errors: true

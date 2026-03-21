@@ -1,0 +1,14 @@
+---
+- name: Cleanup
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify services are stopped
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - clickhouse-server
+        - vector
+      ignore_errors: true
+

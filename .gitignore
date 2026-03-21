@@ -213,3 +213,4 @@ changelogs/.plugin-cache.yaml
 .ansible-test-timeout.json
 *.rpm
 id_ed
+*.tar.gz

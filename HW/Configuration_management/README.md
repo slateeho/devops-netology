@@ -19,7 +19,7 @@
 
 <details>
 
-<summary>2. Работа с Playbook</summary>
+<summary>2. Работа с Playbook </summary>
 
 # Основная часть
 
@@ -43,6 +43,22 @@
 # Основная часть
 
 [README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_use/main_task/README.md)
+
+[08-ansible-03-yandex tag](https://github.com/slateeho/devops-netology/releases/tag/08-ansible-03-yandex)
+
+
+</details>
+
+<details>
+<summary>3. Работа с Roles</summary>
+
+# Основная часть
+
+[README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/main_task/README.md)
+
+![](Ansible_roles/pngs/1.png)
+
+![](Ansible_roles/pngs/2.png)
 
 [08-ansible-03-yandex tag](https://github.com/slateeho/devops-netology/releases/tag/08-ansible-03-yandex)
 

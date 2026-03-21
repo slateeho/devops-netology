@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all:!localhost
+  gather_facts: true
+  vars:
+    docker: false
+    helm: false
+  roles:
+    - clickhouse_role
+    - vector_role
+    - lighthouse
