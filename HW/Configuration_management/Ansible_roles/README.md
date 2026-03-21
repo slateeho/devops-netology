@@ -616,10 +616,6 @@ clickhouse_user: default
 clickhouse_password: password
 ```
 
-### Supported Platforms
-
-**CentOS 7 only**
-
 ### Dependencies
 
 - Nginx web server
