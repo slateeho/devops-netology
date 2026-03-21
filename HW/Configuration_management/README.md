@@ -54,7 +54,7 @@
 
 # Основная часть
 
-[README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/main_task/README.md)
+[README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/README.md)
 
 ![](Ansible_roles/pngs/1.png)
 
