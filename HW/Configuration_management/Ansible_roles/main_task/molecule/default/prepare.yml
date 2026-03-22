@@ -4,11 +4,29 @@
   gather_facts: false
   tasks:
     - name: Install required collections
-      ansible.builtin.command: ansible-galaxy collection install community.docker community.general
+      ansible.builtin.command: ansible-galaxy collection install community.docker community.general --collections-path ~/.ansible/collections
       changed_when: false
 
+- name: Create /tmp directory in containers
+  hosts: all:!localhost
+  gather_facts: false
+  tasks:
+    - name: Create /tmp directory
+      ansible.builtin.raw: mkdir -p /tmp && chmod 1777 /tmp
+      changed_when: false
+
+- name: Install Python in containers
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Generate python install script from template
+      ansible.builtin.template:
+        src: "{{ molecule_scenario_directory }}/install_python.py.j2"
+        dest: "{{ molecule_scenario_directory }}/install_python.py"
+        mode: '0755'
+
     - name: Run python install script
-      ansible.builtin.command: python3 /home/a/PY/install_python_logged.py
+      ansible.builtin.command: python3 {{ molecule_scenario_directory }}/install_python.py
       register: python_install_output
       changed_when: false
 
@@ -100,4 +118,3 @@
         mode: '1777'
         state: directory
       failed_when: false
-

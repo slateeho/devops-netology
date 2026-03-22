@@ -1,5 +1,0 @@
----
-  - src: git@github.com:slateeho/devops-netology.git
-    scm: git
-    version: main
-    name: infrastructure

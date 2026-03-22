@@ -50,13 +50,19 @@
 </details>
 
 <details>
-<summary>3. Работа с Roles</summary>
+<summary>4. Работа с Roles</summary>
 
 # Основная часть
 
 [README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/README.md)
 
+Результат выполнения `molecule test`:
+
+![](Ansible_roles/jpgs/1.jpg)
+![](Ansible_roles/jpgs/2.jpg)
+
 [v.1.0.3](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.3)
 
 
+[v.1.0.4](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.4)
 </details>
