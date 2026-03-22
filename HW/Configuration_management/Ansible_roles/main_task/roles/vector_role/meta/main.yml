@@ -1,0 +1,31 @@
+---
+galaxy_info:
+  role_name: vector_role
+  author: slateeho
+  description: Install and configure Vector log aggregator
+  license: MIT
+  min_ansible_version: "2.20.3"
+  platforms:
+    - name: EL
+      versions:
+        - 8
+        - 9
+    - name: Fedora
+      versions:
+        - 39
+    - name: Debian
+      versions:
+        - 12
+    - name: Ubuntu
+      versions:
+        - 22.04
+    - name: ArchLinux
+      versions:
+        - all
+  galaxy_tags:
+    - vector
+    - logging
+    - observability
+    - logs
+
+dependencies: []

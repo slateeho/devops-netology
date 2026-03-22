@@ -1,9 +1,0 @@
----
-clickhouse_version: "22.3.3.44"
-clickhouse_packages:
-  - clickhouse-common-static
-  - clickhouse-client
-  - clickhouse-server
-clickhouse_port: 9000
-clickhouse_http_port: 8123
-clickhouse_database: logs

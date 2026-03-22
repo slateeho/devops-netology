@@ -28,6 +28,9 @@ provisioner:
   name: ansible
   env:
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
+  config_options:
+    defaults:
+      remote_tmp: /tmp/.ansible/tmp
   inventory:
     group_vars:
       all:
