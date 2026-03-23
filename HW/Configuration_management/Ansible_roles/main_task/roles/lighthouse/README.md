@@ -14,8 +14,8 @@ Ansible role to install and configure Lighthouse web UI for ClickHouse.
 
 ### Prerequisites
 
-- Ansible 2.20.3+
-- Python 3.13.5+
+- Ansible 2.20.2+
+- Python 3.14.3+
 - Jinja 3.1.6+
 - ClickHouse running on accessible host
 
