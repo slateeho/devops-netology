@@ -75,13 +75,9 @@ Molecule tests all system types across supported operating systems:
 
 #### Prerequisites
 
-- Ansible 2.20.3+
-- Python 3.13.5+
+- Ansible 2.20.2+
+- Python 3.14.3+
 - Jinja 3.1.6+
-- Docker 26.1.5+
-- Docker Compose 5.0.2+
-- glibc 2.29+ (CentOS 8 Stream default)
-- SSH key pair (id_ed)
 
 Install required collections:
 ```bash
@@ -392,8 +388,8 @@ vector_version: 0.54.0
 
 #### Prerequisites
 
-- Ansible 2.20.3+
-- Python 3.13.5+
+- Ansible 2.20.2+
+- Python 3.14.3+
 - Jinja 3.1.6+
 
 Install required collections:
@@ -499,8 +495,8 @@ clickhouse_password: password
 
 #### Prerequisites
 
-- Ansible 2.20.3+
-- Python 3.13.5+
+- Ansible 2.20.2+
+- Python 3.14.3+
 - Jinja 3.1.6+
 - ClickHouse running on accessible host
 
