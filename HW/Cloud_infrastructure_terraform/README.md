@@ -175,7 +175,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 
 ### Заданиe 9*
 
-<<<<<<< HEAD
+
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/9.png)
 =======
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/9.png)
@@ -485,4 +485,3 @@ CI/CD конфигурация: [.gitlab-ci.yml](task_6/.gitlab-ci.yml)
 ![CI/CD Pipeline Jobs](terraform_team/pngs/7.png)
 
 </details>
->>>>>>> terraform-05
