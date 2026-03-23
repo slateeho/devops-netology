@@ -59,7 +59,7 @@
 Результат выполнения `molecule test`:
 
 ![](Ansible_roles/main_task/jpgs/1.jpg)
-![](Ansible_roles/jpgs/main_task/2.jpg)
+![](Ansible_roles/main_task/jpgs/2.jpg)
 
 [v.1.0.3](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.3)
 
