@@ -54,12 +54,12 @@
 
 # Основная часть
 
-[README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/README.md)
+[README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/main_task/README.md)
 
 Результат выполнения `molecule test`:
 
-![](Ansible_roles/jpgs/1.jpg)
-![](Ansible_roles/jpgs/2.jpg)
+![](Ansible_roles/main_task/jpgs/1.jpg)
+![](Ansible_roles/jpgs/main_task/2.jpg)
 
 [v.1.0.3](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.3)
 
