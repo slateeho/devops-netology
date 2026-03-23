@@ -60,7 +60,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 </details>
 
 <details>
-<summary>02. Основы Terraform. Yandex Cloud</summary>
+<summary>2. Основы Terraform. Yandex Cloud</summary>
 
 ##
 
@@ -87,7 +87,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 
 ## Задание 5-6
 
-Задание выполне:wqно в коде папки `terraform_basics`
+Задание выполнено в коде папки `terraform_basics`
 
 ### Задание 7*
 
@@ -104,7 +104,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 </details>
 
 <details>
-<summary>03. Управляющие конструкции в коде Terraform Основы Terraform.</summary>
+<summary>3. Управляющие конструкции в коде Terraform Основы Terraform.</summary>
 
 ### Задание 1
 
@@ -184,7 +184,7 @@ Opentofu init \ apply в yandex и docker remote директориях:
 </details>
 
 <details>
-<summary>Продвинутые методы работы с Terraform</summary>
+<summary>4. Продвинутые методы работы с Terraform</summary>
 
 
 ### Задание 1
@@ -414,7 +414,7 @@ develop-webs-0 ru-central1-a fhmhkl0si359stsebd16 RUNNING
 
 
 <details>
-<summary>05. Использование Terraform в команде</summary>
+<summary>5. Использование Terraform в команде</summary>
 
 ### Задание 1
 
