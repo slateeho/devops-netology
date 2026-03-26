@@ -1,0 +1,142 @@
+#cloud-config
+ssh_pwauth: false      
+users:
+  - name: ${vm_user}
+    groups: [docker, sudo]
+    shell: /bin/bash
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
+    ssh_authorized_keys:
+      - ${public_key}
+
+groups:
+  - docker
+
+packages:
+  - sudo
+  - ca-certificates
+  - curl
+  - git
+  
+bootcmd:
+  - mkdir -p /opt/db/db-data
+  - rm -rf /opt/db/db-data/*
+  - mkdir -p /opt/db/initdb
+  - mkdir -p /etc/docker
+  - chmod 755 /etc/docker
+
+write_files:
+  - path: /etc/docker/daemon.json
+    owner: root:root
+    permissions: '0644'
+    content: |
+      {
+      "storage-driver": "overlay2",
+      "debug": true,
+      "default-address-pools": [
+        {
+          "base": "172.20.0.0/16",
+          "size": 24
+        }
+      ],
+      "insecure-registries": ["cr.yandex"]
+      }
+    defer: true
+
+  - path: /etc/sysctl.d/enabled_ipv4_forwarding.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      net.ipv4.conf.all.forwarding=1
+
+  - path: /etc/systemd/system/docker.service.d/override.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Service]
+      CPUQuota=20%
+
+  - path: /usr/local/bin/setup-docker.sh
+    owner: root:root
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+
+      apt-get update
+      apt-get install -y ca-certificates curl
+
+      install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+      chmod a+r /etc/apt/keyrings/docker.asc
+
+      cat > /etc/apt/sources.list.d/docker.sources <<EOF
+      Types: deb
+      URIs: https://download.docker.com/linux/debian
+      Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+      Components: stable
+      Signed-By: /etc/apt/keyrings/docker.asc
+      EOF
+
+      mkdir -p /opt/db/db-data
+      chmod 755 -R /opt/db
+
+      apt-get update
+      apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+      sysctl -p /etc/sysctl.d/enabled_ipv4_forwarding.conf
+
+      usermod -aG docker root
+      
+      systemctl enable docker || true
+      systemctl start docker || /usr/bin/dockerd -D &
+      sleep 5
+
+  - path: /opt/db/docker-compose.yml
+    owner: root:root
+    permissions: '0644'
+    content: |
+      version: "3.9"
+      services:
+        db:
+          image: mariadb:10.5
+          environment:
+            - MYSQL_DATABASE="${db_name}"
+            - MYSQL_ROOT_PASSWORD="${db_root_password}"
+            - MYSQL_USER="${db_user}"
+            - MYSQL_PASSWORD="${db_password}"
+          restart: always
+          ports:
+            - "3306:3306"
+          volumes:
+            - db-data:/var/lib/mysql
+            - ./initdb:/docker-entrypoint-initdb.d
+          networks:
+            - spring-mysql
+      volumes:
+        db-data: {}
+      networks:
+        spring-mysql: {}
+
+  - path: /opt/db/initdb/01-grants.sql
+    owner: root:root
+    permissions: '0644'
+    content: |
+      CREATE DATABASE IF NOT EXISTS app_db;
+
+      CREATE USER IF NOT EXISTS '${db_user}'@'%' IDENTIFIED BY '${db_password}';
+      GRANT ALL PRIVILEGES ON app_db.* TO '${db_user}'@'%';
+
+      ALTER USER 'root'@'localhost' IDENTIFIED BY '${db_root_password}';
+
+      FLUSH PRIVILEGES; 
+
+runcmd:
+  - ["/usr/local/bin/setup-docker.sh"]
+  - [sleep, "15"]
+  - [sh, -c, "for i in {1..30}; do docker ps >/dev/null 2>&1 && break || sleep 1; done"]
+  - [sh, -c, "echo '${yc_token}' | docker login --username oauth --password-stdin cr.yandex"]
+  - [sh, -c, "docker pull mariadb:10.5"]
+  - [sh, -c, "cd /opt/db && docker compose up -d"]
+  - [sleep, "30"]
+  - [sh, -c, "docker exec db-db-1 mariadb -u root -p'${db_root_password}' -e \"SOURCE /docker-entrypoint-initdb.d/01-grants.sql;\""]
+  - [sh, -c, "echo 'Cloud-init complete' > /var/log/cloud-init-complete.log"]

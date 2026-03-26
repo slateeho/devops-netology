@@ -20,7 +20,7 @@
 - при добавлении новых ресурсов отсутствие плана не позволяет понять, что происходит удаление и пересоздание других ресурсов, приведет к потере доступности ресурса (опасно наличие записи will be replaced)
 - при планировании наглядно отображается что будет destroy, и create
 - не отображаются обновления ресурсов, которые были внесены до этого
-- вероятность частичного создания инфраструктуры
+- вероятность частичного созда7ния инфраструктуры
 - возникновение ошибок при наличии любых интерактивных скриптов (например, *.expect) (требующих взаимодействия с пользователем через терминал)
 
 ![Введение в Terraform](terraform_intro/3.png)
@@ -71,10 +71,6 @@ Opentofu init \ apply в yandex и docker remote директориях:
 - необходимо указать  дефолтные значения yc cloud_id/fodler_id,
 - неверный  platform_id ('standart-v4' -> 'standatd-v3')
 
-<<<<<<< HEAD
-
-=======
->>>>>>> terraform-05
 Опции Preemptable = true и использьвание 20% CPU позволяет экономить денежные средства, уменьшая их потребление путем снижения как платы за CPU, так и позволяя автоматически выключать неиспользуемую виртуальную машину, снижая расход до нуля
 
 ![Основы в Terraform](terraform_basics/task_1/pngs/1.png)
@@ -108,20 +104,6 @@ Opentofu init \ apply в yandex и docker remote директориях:
 
 ### Задание 1
 
-<<<<<<< HEAD
-![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/1.png)
-
-![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/2.png)
-
-### Задания 2-4
-
-![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4.png)
-
-
-![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/4_1.png)
-
-![Основы в expectTerraform](terraform_control_constructs/terraform-03/pngs/4.png)
-=======
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/1.png)
 
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/2.png)
@@ -134,34 +116,25 @@ Opentofu init \ apply в yandex и docker remote директориях:
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/4_1.png)
 
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/4.png)
->>>>>>> terraform-05
 
 
 ### Заданиe 5*
 
-<<<<<<< HEAD
-![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
-=======
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
->>>>>>> terraform-05
 
 
 ### Заданиe 5*
 
-<<<<<<< HEAD
-![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
-=======
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/5.png)
->>>>>>> terraform-05
 
 
 ### Заданиe 6*
 
-<<<<<<< HEAD
+
 ![Основы в Terraform](terraform_control_constructs/terraform-03/pngs/6.png)
 =======
 ![Управляющие конструкции в Terraform](terraform_control_constructs/terraform-03/pngs/6.png)
->>>>>>> terraform-05
+
 
 
 ### Заданиe 7*
@@ -483,5 +456,22 @@ CI/CD конфигурация: [.gitlab-ci.yml](task_6/.gitlab-ci.yml)
 ### Задание 7*
 
 ![CI/CD Pipeline Jobs](terraform_team/pngs/7.png)
+
+</details>
+
+
+
+<details>
+<summary>6. Итоговый прокет Terraform</summary>
+
+
+[Root module итогового проекта](terraform_final)
+
+
+[README.md](terraform_final/README.md)
+
+![](terraform_final/pngs/1.png)
+![](terraform_final/pngs/2.png)
+
 
 </details>

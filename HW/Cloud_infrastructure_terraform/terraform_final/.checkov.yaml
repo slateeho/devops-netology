@@ -1,0 +1,12 @@
+skip-download: false
+quiet: false
+compact: false
+framework:
+  - terraform
+
+skip-path:
+  - awesome-compose
+
+skip-check:
+  - CKV_YC_2
+  - CKV_YC_11

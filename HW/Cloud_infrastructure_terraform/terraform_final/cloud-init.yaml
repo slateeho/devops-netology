@@ -1,0 +1,229 @@
+#cloud-config
+ssh_pwauth: false      
+groups:
+  - docker
+
+users:
+  - name: ${vm_user}
+    groups: [docker, sudo]
+    shell: /bin/bash
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'
+    ssh_authorized_keys:
+      - ${public_key}
+
+
+packages:
+  - sudo
+  - ca-certificates
+  - curl
+  - git
+  - nodejs
+  - npm
+  - vim
+  - jq
+
+bootcmd:
+  - mkdir -p /etc/docker
+  - chmod 755 /etc/docker
+
+write_files:
+  - path: /etc/docker/daemon.json
+    owner: root:root
+    permissions: '0644'
+    content: |
+      {
+      "storage-driver": "overlay2",
+      "debug": true,
+      "default-address-pools": [
+        {
+          "base": "172.20.0.0/16",
+          "size": 24
+        }
+      ],
+      "insecure-registries": ["cr.yandex"]
+      }
+    defer: true
+
+  - path: /usr/local/bin/fetch-ssh-key.sh
+    owner: root:root
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+
+      SECRET_ID="${lockbox_secret_id}"
+
+      
+      SSH_PRIVATE_KEY=$(yc lockbox secret list-versions \
+        --id "$SECRET_ID" \
+        --format json 2>/dev/null \
+        | jq -r '.[0].entries[] | select(.key=="ssh_private_key") | .text_value' 2>/dev/null) || true
+
+      if [ -z "$SSH_PRIVATE_KEY" ]; then
+        echo "Error: Cannot read ssh_private_key from Lockbox: $SECRET_ID"
+        exit 1
+      fi
+
+      mkdir -p /root/.ssh
+      chmod 700 /root/.ssh
+
+      echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_ed25519
+      chmod 600 /root/.ssh/id_ed25519
+      chown root:root /root/.ssh/id_ed25519
+
+      echo "SSH private key fetched from Lockbox"
+
+
+
+
+  - path: /etc/sysctl.d/enabled_ipv4_forwarding.conf
+    content: |
+      net.ipv4.conf.all.forwarding=1
+    defer: true
+
+#  - path: /root/.ssh/id_ed25519
+#    owner: root:root
+#    permissions: '0600'
+#    content: |
+#     -----BEGIN OPENSSH PRIVATE KEY-----
+#      b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+#      QyNTUxOQAAACCi2gGzQntxWj91OsHgQmlOBbc1HSIK5KArzBgLGHpJWQAAAJBc6GR2XOhk
+#      dgAAAAtzc2gtZWQyNTUxOQAAACCi2gGzQntxWj91OsHgQmlOBbc1HSIK5KArzBgLGHpJWQ
+#      AAAECTDPGasOpVydGbCjTf2xRlNv2aTXSKsd5eeF02v2tlzqLaAbNCe3FaP3U6weBCaU4F
+#      tzUdIgrkoCvMGAsYeklZAAAACXRlcnJhZm9ybQECAwQ=
+#      -----END OPENSSH PRIVATE KEY-----
+#    defer: true
+
+  - path: /usr/local/bin/setup-docker.sh
+    owner: root:root
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+      apt-get update
+      apt-get install -y ca-certificates curl
+      install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+      chmod a+r /etc/apt/keyrings/docker.asc
+      cat > /etc/apt/sources.list.d/docker.sources <<EOF
+      Types: deb
+      URIs: https://download.docker.com/linux/debian
+      Suites: $(. /etc/os-release && echo $VERSION_CODENAME)
+      Components: stable
+      Signed-By: /etc/apt/keyrings/docker.asc
+      EOF
+      apt-get update
+      apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      sysctl -p /etc/sysctl.d/enabled_ipv4_forwarding.conf
+      
+      usermod -aG docker root
+      
+      systemctl enable docker || true
+      systemctl start docker || /usr/bin/dockerd -D &
+      sleep 5
+
+  - path: /usr/local/bin/setup-tunnel.sh
+    owner: root:root
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+
+      TUNNEL_DEBUG=0
+
+      if [ "$TUNNEL_DEBUG" -ne 0 ]; then
+        exec 2>/tmp/tunnel_logs
+        set -x
+        env >&2
+      fi
+
+      SSH_HOST="${db_cluster_host}"
+      SSH_PORT="22"
+      SSH_USER="${vm_user}"
+      SSH_PRIVATE_KEY="$(cat /root/.ssh/id_ed25519)"
+      TUNNEL_TARGET_HOST="${db_cluster_host}"
+      TUNNEL_TARGET_PORT="3306"
+      LOCAL_TUNNEL_PORT="3306"
+      TUNNEL_MAX_ATTEMPTS="10"
+
+      DB_NAME="${db_database_name}"
+      DB_USER="${db_user_name}"
+      DB_PASSWORD="${db_user_password}"
+
+      if ! command -v nc >/dev/null 2>&1; then
+        apt-get install -y netcat-openbsd
+      fi
+
+      TEMP=$(mktemp)
+      trap 'rm -f "$TEMP"' EXIT SIGINT SIGTERM
+      echo "$SSH_PRIVATE_KEY" > "$TEMP"
+      chmod 600 "$TEMP"
+
+      pkill -f "ssh.*-M -S terraform_ssh_tunnel.*-L $$LOCAL_TUNNEL_PORT:" 2>/dev/null || true
+
+      ssh -o ExitOnForwardFailure=yes \
+          -o StrictHostKeyChecking=no \
+          -o BatchMode=yes \
+          -o ServerAliveInterval=30 \
+          -o ServerAliveCountMax=3 \
+          -i "$TEMP" \
+          -f -N \
+          -M -S terraform_ssh_tunnel \
+          -L "0.0.0.0:$LOCAL_TUNNEL_PORT:$TUNNEL_TARGET_HOST:$TUNNEL_TARGET_PORT" \
+          -p "$SSH_PORT" "$SSH_USER@$SSH_HOST"
+
+      attempt=0
+      while [ $attempt -lt $TUNNEL_MAX_ATTEMPTS ]; do
+        if nc -z 127.0.0.1 "$LOCAL_TUNNEL_PORT" 2>/dev/null; then
+          echo "{ \"host\": \"127.0.0.1\", \"port\": \"$LOCAL_TUNNEL_PORT\", \"database\": \"$DB_NAME\", \"user\": \"$DB_USER\" }"
+          exit 0
+        fi
+        sleep 1
+        attempt=$(( $attempt + 1 ))
+      done
+
+      echo "Failed to establish tunnel to $TUNNEL_TARGET_HOST:$TUNNEL_TARGET_PORT via $SSH_HOST after $TUNNEL_MAX_ATTEMPTS attempts" >&2
+      ssh -S terraform_ssh_tunnel -O exit "$SSH_USER@$SSH_HOST" 2>/dev/null || true
+      exit 1
+    defer: true
+
+  - path: /etc/systemd/system/docker.service.d/override.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Service]
+      CPUQuota=50%
+    defer: true
+
+  - path: /etc/systemd/system/ssh-tunnel.service
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=SSH Tunnel to Database
+      After=network.target docker.service
+      Wants=docker.service
+
+      [Service]
+      Type=forking
+      User=root
+      ExecStart=/usr/local/bin/setup-tunnel.sh
+      Restart=on-failure
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+    defer: true
+
+runcmd:
+  - [curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i /opt/yc -n]
+  - [ln -sf /opt/yc/bin/yc /usr/local/bin/yc]
+  - [sh, -c, "yc config set token '${yc_token}'"]
+  - [sh, -c, "yc config set folder-id '${folder_id}'"]
+  - ["/usr/local/bin/fetch-ssh-key.sh"]
+  - ["/usr/local/bin/setup-docker.sh"]
+  - [sleep, "15"]
+  - [sh, -c, "for i in {1..30}; do docker ps >/dev/null 2>&1 && break || sleep 1; done"]
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, ssh-tunnel.service]
+  - [systemctl, start, ssh-tunnel.service]
+  - [sh, -c, "echo 'Cloud-init complete' > /var/log/cloud-init-complete.log"]
