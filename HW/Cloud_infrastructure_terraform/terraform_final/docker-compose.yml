@@ -1,0 +1,36 @@
+services:
+  backend:
+    image: cr.yandex/crp2b5pkp2eu3ecdvgva/backend:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://172.20.2.1:3306/app_db"
+      SPRING_DATASOURCE_USERNAME: "app_user"
+      SPRING_DATASOURCE_PASSWORD: "67qibppJLwsjh-YnI-cQIIdr"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+
+    networks:
+      - react-spring
+      - spring-mysql
+
+  frontend:
+    image: cr.yandex/crp2b5pkp2eu3ecdvgva/frontend:latest
+    restart: always
+    ports:
+      - "3000:80"
+    expose:
+      - "3000"
+    volumes:
+      - ./frontend/src:/code/src
+      - /project/node_modules
+    networks:
+      - react-spring
+    depends_on:
+      - backend
+
+networks:
+  react-spring: {}
+  spring-mysql: {}

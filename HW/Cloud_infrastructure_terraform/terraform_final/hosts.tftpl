@@ -1,0 +1,12 @@
+[all:vars]
+ansible_user=${username}
+ansible_ssh_private_key_file=${path_module}/id_ed25519
+ansible_ssh_common_args=-o StrictHostKeyChecking=no -o ConnectTimeout=30
+ansible_connection_timeout=30
+ansible_python_interpreter=/usr/bin/python3
+
+[web]
+${web_vm_ip} ansible_host=${web_vm_ip} fqdn=web.local
+
+[db]
+${db_host} ansible_host=${db_host} fqdn=db.local
