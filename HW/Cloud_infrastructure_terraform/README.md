@@ -444,7 +444,6 @@ develop-webs-0 ru-central1-a fhmhkl0si359stsebd16 RUNNING
 
 ![Продвинутые методы работы с Terraform](terraform_team/pngs/7.png)
 
-</details>
 
 ### Задание 6*
 
