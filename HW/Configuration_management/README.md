@@ -90,5 +90,11 @@
 
 [v1.0.5](https://github.com/slateeho/devops-netology/releases/tag/v1.0.5)
 
+Результат выполнения `tox -r`:
+
+![](Ansible_molecule/main_task/pngs/4.png)
+
+[v1.0.6](https://github.com/slateeho/devops-netology/releases/tag/v1.0.6)
+
 </details>
 

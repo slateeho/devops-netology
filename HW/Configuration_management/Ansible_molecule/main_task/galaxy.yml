@@ -1,12 +1,12 @@
 namespace: slateeho
 name: infrastructure
-version: 1.0.5
+version: 1.0.6
 readme: README.md
 authors:
   - LAO
 description: >
   Ansible roles for deploying ClickHouse, Vector, and Lighthouse with full
-  cross‑distribution support and strict idempotence guarantees. The Molecule
+  cross‑distribution support and strict idempotence guarantees (even in tox envs). The Molecule
   test matrix validates behavior on Arch, Debian, CentOS, Fedora, Oracle Linux, Ubuntu 22.04 and 24.04. Version 1.0.1 suppot CentOS 7
 license:
   - MIT
@@ -19,3 +19,4 @@ tags:
   - lighthouse
   - centos7
   - logging
+  - tox

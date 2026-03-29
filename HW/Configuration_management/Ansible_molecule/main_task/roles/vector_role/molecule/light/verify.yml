@@ -1,0 +1,13 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check vector binary exists
+      command: /usr/bin/vector --version
+      register: vector_version
+      changed_when: false
+
+    - name: Show version
+      debug:
+        var: vector_version.stdout
