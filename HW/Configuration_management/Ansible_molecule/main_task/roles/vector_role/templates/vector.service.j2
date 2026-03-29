@@ -1,0 +1,13 @@
+[Unit]
+Description=Vector
+After=network.target
+
+[Service]
+Type=simple
+User={{ vector_user | default("centos") }}
+ExecStart={{ vector_bin }} --config {{ vector_config_dir }}/vector.toml
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

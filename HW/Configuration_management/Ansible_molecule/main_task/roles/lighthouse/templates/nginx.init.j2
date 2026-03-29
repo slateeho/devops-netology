@@ -1,0 +1,47 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          nginx
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Nginx web server
+### END INIT INFO
+
+DAEMON=/usr/sbin/nginx
+PIDFILE=/var/run/nginx.pid
+NAME=nginx
+
+[ -x "$DAEMON" ] || exit 0
+
+case "$1" in
+  start)
+    echo "Starting $NAME"
+    $DAEMON
+    ;;
+  stop)
+    echo "Stopping $NAME"
+    [ -f "$PIDFILE" ] && kill $(cat "$PIDFILE") 2>/dev/null
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  reload)
+    [ -f "$PIDFILE" ] && kill -HUP $(cat "$PIDFILE") 2>/dev/null
+    ;;
+  status)
+    if [ -f "$PIDFILE" ] && kill -0 $(cat "$PIDFILE") 2>/dev/null; then
+      echo "$NAME is running"
+    else
+      echo "$NAME is not running"
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload|status}"
+    exit 1
+    ;;
+esac
+exit 0

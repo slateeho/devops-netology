@@ -1,0 +1,47 @@
+user  nginx;
+worker_processes auto;
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  include       /etc/nginx/mime.types;
+  default_type  application/octet-stream;
+  sendfile        on;
+  keepalive_timeout 65;
+
+  access_log  {{ clickhouse_access_log | default("/var/log/nginx/access.log") }};
+  error_log   {{ clickhouse_error_log | default("/var/log/nginx/error.log") }};
+
+  server {
+    listen       {{ lighthouse_http_port | default(80) }};
+    server_name  {{ lighthouse_server_name | default("localhost") }};
+
+    access_log  {{ clickhouse_access_log | default("/var/log/nginx/access.log") }};
+    error_log   {{ clickhouse_error_log | default("/var/log/nginx/error.log") }};
+
+    location / {
+      root   {{ clickhouse_www_path | default("/var/www/lighthouse") }};
+      index  index.html index.htm;
+
+      auth_basic "ClickHouse";
+      auth_basic_user_file {{ clickhouse_htpasswd_file | default("/etc/nginx/.htpasswd") }};
+    }
+
+    location /clickhouse {
+      proxy_pass http://127.0.0.1:8123;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+      root   {{ clickhouse_www_path | default("/var/www/lighthouse") }};
+    }
+  }
+}

@@ -1,0 +1,17 @@
+---
+- name: Install all services on localhost
+  hosts: oracle
+  connection: docker
+  tags:
+    - always
+  pre_tasks:
+    - name: Remove pacman lock file if exists
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/pacman/db.lck
+        state: absent
+      ignore_errors: true
+  roles:
+    - clickhouse_role
+    - vector_role
+    - lighthouse

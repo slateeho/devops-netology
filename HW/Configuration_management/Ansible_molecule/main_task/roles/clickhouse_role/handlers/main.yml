@@ -1,0 +1,10 @@
+---
+- name: Start clickhouse service
+  become: true
+  ansible.builtin.shell: |
+    if [ -d /run/systemd/system ]; then
+      systemctl enable --now clickhouse-server
+    else
+      clickhouse-server --daemon || true
+    fi
+  changed_when: true

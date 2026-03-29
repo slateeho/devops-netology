@@ -1,0 +1,61 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+
+    ###########################################################################
+    # 1. Vector binary must exist
+    ###########################################################################
+    - name: Execute vector --version
+      command: vector --version
+      changed_when: false
+      register: vector_version_rc
+
+    - name: Assert vector is installed
+      assert:
+        that:
+          - vector_version_rc is success
+
+
+    ###########################################################################
+    # 2. Detect config files
+    ###########################################################################
+    - name: Check if vector.toml exists
+      stat:
+        path: /etc/vector/vector.toml
+      register: toml_stat
+
+    - name: Check if vector.yaml exists
+      stat:
+        path: /etc/vector/vector.yaml
+      register: yaml_stat
+
+
+    ###########################################################################
+    # 3. Validate config only if present
+    ###########################################################################
+    - name: Validate TOML config if present
+      command: vector validate /etc/vector/vector.toml
+      register: vector_validate_toml
+      changed_when: false
+      failed_when: false
+      when: toml_stat.stat.exists
+
+    - name: Validate YAML config if present
+      command: vector validate /etc/vector/vector.yaml
+      register: vector_validate_yaml
+      changed_when: false
+      failed_when: false
+      when: yaml_stat.stat.exists
+
+    - name: Assert config is valid OR no config exists
+      assert:
+        that:
+          - (toml_stat.stat.exists and vector_validate_toml.rc == 0)
+            or
+            (yaml_stat.stat.exists and vector_validate_yaml.rc == 0)
+            or
+            (not toml_stat.stat.exists and not yaml_stat.stat.exists)
+        fail_msg: "Vector config validation failed"
+      changed_when: false

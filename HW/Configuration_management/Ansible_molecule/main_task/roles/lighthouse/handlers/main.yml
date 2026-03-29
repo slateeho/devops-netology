@@ -1,0 +1,45 @@
+---
+# roles/lighthouse/handlers/main.yml
+
+- name: Reload systemd
+  become: true
+  ansible.builtin.command: systemctl daemon-reload
+  when: ansible_facts.get('service_mgr') == 'systemd'
+  changed_when: false
+
+- name: Start nginx service (systemd)
+  become: true
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    masked: false
+    state: started
+  when: ansible_facts.get('service_mgr') == 'systemd'
+
+- name: Start nginx service (init.d)
+  become: true
+  ansible.builtin.shell: |
+    if [ -x /etc/init.d/nginx ]; then
+      /etc/init.d/nginx start
+    elif command -v service >/dev/null 2>&1 && service nginx start >/dev/null 2>&1; then
+      true
+    else
+      # fallback to direct binary start if no init script present
+      nginx -t && (nginx -s stop 2>/dev/null || true) && nginx
+    fi
+  args:
+    executable: /bin/bash
+    creates: /var/run/nginx.pid
+  when: ansible_facts.get('service_mgr') != 'systemd'
+  changed_when: false
+  # mark changed only if pid file was created
+  register: nginx_start_result
+
+- name: Mark handler changed if nginx started (set fact)
+  ansible.builtin.set_fact:
+    nginx_handler_changed: true
+  when:
+    - nginx_start_result is defined
+    - nginx_start_result.rc == 0
+    - nginx_start_result.stdout is defined or nginx_start_result.stderr is defined
+  changed_when: false

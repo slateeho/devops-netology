@@ -1,0 +1,5 @@
+---
+nginx_user: nginx
+nginx_conf_dir: /etc/nginx/conf.d
+nginx_conf_file: /etc/nginx/conf.d/lighthouse.conf
+nginx_default_root: /usr/share/nginx/html

@@ -67,3 +67,29 @@
 [v.1.0.4](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.4)
 </details>
 
+</details>
+
+<details>
+<summary>5. Тестирование Roles</summary>
+
+# Основная часть
+
+[README.md по ролям `Clickhouse` + `Lighthouse` и `Vector`](Ansible_roles/main_task/README.md)
+
+Результат выполнения `molecule converge`:
+
+![](Ansible_molecule/main_task/pngs/1.png)
+
+
+Результат выполнения `molecule idempotence`:
+
+![](Ansible_molecule/main_task/pngs/2.png)
+
+Результат выполнения `molecule verify`:
+
+![](Ansible_molecule/main_task/pngs/2.png)
+
+[v.1.0.5](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.5)
+
+</details>
+
