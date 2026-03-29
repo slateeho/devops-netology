@@ -1,4 +1,3 @@
-
 Ansible roles to install and configure ClickHouse, Vector, and Lighthouse.
 
 **Supported Platforms:**
@@ -12,7 +11,11 @@ Ansible roles to install and configure ClickHouse, Vector, and Lighthouse.
 
 
 
-**Available on Ansible Galaxy:** https://galaxy.ansible.com/slateeho/infrastructure (v1.0.4)
+**Available on Ansible Galaxy:** 
+
+https://galaxy.ansible.com/slateeho/infrastructure
+-  (v1.0.6) - Tox and Vector lightened role
+- (v.1.0.5) - Full molecule idempotence without Tox with full Vector role
 
 Install with:
 ```bash
@@ -45,6 +48,8 @@ Molecule tests all system types across supported operating systems with `idempot
 - Ubuntu 22.04
 - Ubuntu 24.04
 - Oracle Linux 8
+
+## Tox Testing
 
 ## Quick Navigation
 

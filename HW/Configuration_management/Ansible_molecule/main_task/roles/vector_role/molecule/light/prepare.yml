@@ -1,0 +1,17 @@
+---
+- name: Fix CentOS 8 EOL repositories
+  hosts: all
+  become: true
+  tasks:
+    - name: Replace CentOS 8 repos with vault.centos.org
+      ansible.builtin.shell: |
+        sed -i 's|mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/*.repo
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/*.repo
+      args:
+        warn: false
+
+    - name: Clean metadata
+      ansible.builtin.command: dnf clean all
+
+    - name: Makecache
+      ansible.builtin.command: dnf makecache
