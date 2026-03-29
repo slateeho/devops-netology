@@ -61,10 +61,10 @@
 ![](Ansible_roles/main_task/jpgs/1.jpg)
 ![](Ansible_roles/main_task/jpgs/2.jpg)
 
-[v.1.0.3](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.3)
+[v1.0.3](https://github.com/slateeho/devops-netology/releases/tag/v1.0.3)
 
 
-[v.1.0.4](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.4)
+[v1.0.4](https://github.com/slateeho/devops-netology/releases/tag/v1.0.4)
 </details>
 
 </details>
@@ -80,7 +80,6 @@
 
 ![](Ansible_molecule/main_task/pngs/1.png)
 
-
 Результат выполнения `molecule idempotence`:
 
 ![](Ansible_molecule/main_task/pngs/2.png)
@@ -89,7 +88,7 @@
 
 ![](Ansible_molecule/main_task/pngs/2.png)
 
-[v.1.0.5](https://github.com/slateeho/devops-netology/releases/tag/v.1.0.5)
+[v1.0.5](https://github.com/slateeho/devops-netology/releases/tag/v1.0.5)
 
 </details>
 
