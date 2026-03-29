@@ -1,0 +1,21 @@
+namespace: slateeho
+name: infrastructure
+version: 1.0.5
+readme: README.md
+authors:
+  - LAO
+description: >
+  Ansible roles for deploying ClickHouse, Vector, and Lighthouse with full
+  cross‑distribution support and strict idempotence guarantees. The Molecule
+  test matrix validates behavior on Arch, Debian, CentOS, Fedora, Oracle Linux, Ubuntu 22.04 and 24.04. Version 1.0.1 suppot CentOS 7
+license:
+  - MIT
+repository: https://github.com/slateeho/devops-netology
+documentation: https://github.com/slateeho/devops-netology/tree/main/HW/Configuration_management/Ansible_use/main_task
+issues: https://github.com/slateeho/devops-netology/issues
+tags:
+  - clickhouse
+  - vector
+  - lighthouse
+  - centos7
+  - logging

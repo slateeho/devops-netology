@@ -1,0 +1,180 @@
+---
+# roles/lighthouse/tasks/nginx.yml
+# Idempotent nginx configuration and service management WITHOUT systemd.
+# Safe for containers and minimal images: prefers init.d/service, falls back to direct binary start.
+# Guards prevent duplicate work when included multiple times.
+
+- name: Skip nginx management if already handled on this host
+  ansible.builtin.debug:
+    msg: "nginx already managed on this host, skipping"
+  when: nginx_service_handled | default(false)
+  changed_when: false
+  tags: lighthouse
+
+- name: Ensure nginx package is installed
+  become: true
+  ansible.builtin.package:
+    name: "{{ nginx_package | default('nginx') }}"
+    state: present
+  when: not (nginx_service_handled | default(false))
+  tags: lighthouse
+
+- name: Gather service facts if not present
+  ansible.builtin.service_facts:
+  when:
+    - not (nginx_service_handled | default(false))
+    - ansible_facts.services is not defined
+  tags: lighthouse
+
+- name: Set fallback facts
+  ansible.builtin.set_fact:
+    nginx_bin: "{{ nginx_bin | default('/usr/sbin/nginx') }}"
+    nginx_pid: "{{ nginx_pid | default('/var/run/nginx.pid') }}"
+  when: not (nginx_service_handled | default(false))
+  tags: lighthouse
+
+- name: Check nginx binary exists
+  ansible.builtin.stat:
+    path: "{{ nginx_bin }}"
+  register: nginx_bin_stat
+  when: not (nginx_service_handled | default(false))
+  tags: lighthouse
+
+- name: Check if nginx service is known in service_facts (safe)
+  ansible.builtin.set_fact:
+    nginx_service_known: >-
+      {{ (
+           (ansible_facts is defined)
+           and ((ansible_facts | default({})).get('services') is not none)
+           and ('nginx' in (ansible_facts | default({})).get('services', {}))
+         ) | bool }}
+  when: not (nginx_service_handled | default(false))
+  tags: lighthouse
+
+- name: Deploy nginx configuration (template) if present
+  become: true
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+    owner: root
+    group: root
+  when:
+    - not (nginx_service_handled | default(false))
+    - lookup('file', role_path + '/templates/nginx.conf.j2', errors='ignore') is not none
+  notify: Start nginx service
+  tags: lighthouse
+
+- name: Deploy site files (if role provides them)
+  become: true
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ clickhouse_www_path }}/{{ item.dest }}"
+    owner: nginx
+    group: nginx
+    mode: "{{ item.mode | default('0644') }}"
+  loop: "{{ lighthouse_site_files | default([]) }}"
+  when:
+    - not (nginx_service_handled | default(false))
+    - lighthouse_site_files is defined
+  tags: lighthouse
+
+- name: Ensure /var/run exists and ownership for pid
+  become: true
+  ansible.builtin.file:
+    path: "{{ nginx_pid | default('/var/run/nginx.pid') | dirname }}"
+    state: directory
+    mode: '0755'
+    owner: nginx
+    group: nginx
+  when: not (nginx_service_handled | default(false))
+  tags: lighthouse
+
+- name: Start nginx via service module when service is registered
+  become: true
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+  when:
+    - not (nginx_service_handled | default(false))
+    - nginx_service_known | bool
+  tags: lighthouse
+
+- name: Check if nginx process is running
+  ansible.builtin.command: pgrep -x nginx
+  register: nginx_pgrep
+  failed_when: false
+  changed_when: false
+  tags:
+    - lighthouse
+
+
+- name: Check if /etc/init.d/nginx exists (init.d-only / containers)
+  ansible.builtin.stat:
+    path: /etc/init.d/nginx
+    get_md5: no
+    get_checksum: no
+  register: nginx_initd_stat
+  changed_when: false
+  failed_when: false
+  tags:
+    - lighthouse
+
+- name: Normalize init.d stat result to a boolean (nginx_initd_exists)
+  ansible.builtin.set_fact:
+    nginx_initd_exists: "{{ nginx_initd_stat.stat.exists | default(nginx_initd_stat.exists | default(false)) }}"
+  changed_when: false
+  tags:
+    - lighthouse
+
+
+- name: Check if nginx process is running (containers)
+  ansible.builtin.command: pgrep -x nginx
+  register: nginx_pgrep
+  failed_when: false
+  changed_when: false
+  tags:
+    - lighthouse
+
+
+- name: Start nginx via init.d when not running (init.d only, containers)
+  become: true
+  ansible.builtin.command: /etc/init.d/nginx start
+  register: nginx_start
+  failed_when: false
+  changed_when: nginx_start.rc == 0 and nginx_pgrep.rc != 0
+  when:
+    - nginx_initd_exists | bool
+    - nginx_pgrep.rc != 0
+    - not (nginx_service_handled | default(false))
+    - not (nginx_service_known | default(false))
+  tags:
+    - lighthouse
+
+
+- name: Verify nginx is listening on HTTP port (best-effort)
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ lighthouse_http_port | default(80) }}"
+    timeout: 10
+    state: started
+  register: nginx_wait
+  failed_when: false
+  when: not (nginx_service_handled | default(false))
+  tags: lighthouse
+
+- name: Fail when nginx is neither a known service nor installed
+  ansible.builtin.fail:
+    msg: "nginx is not installed and no init script or binary found on this host."
+  when:
+    - not (nginx_service_handled | default(false))
+    - not (nginx_service_known | default(false))
+    - not nginx_bin_stat.stat.exists
+  tags: lighthouse
+
+- name: Mark nginx as handled on this host
+  ansible.builtin.set_fact:
+    nginx_service_handled: true
+  when: not (nginx_service_handled | default(false))
+  tags: lighthouse

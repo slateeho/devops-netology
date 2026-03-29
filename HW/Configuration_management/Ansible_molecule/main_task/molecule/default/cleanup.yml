@@ -1,0 +1,12 @@
+---
+- name: Cleanup
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify services are stopped
+      ansible.builtin.raw: "systemctl stop {{ item }} 2>/dev/null || service {{ item }} stop 2>/dev/null || true"
+      loop:
+        - clickhouse-server
+        - vector
+      ignore_errors: true
+      changed_when: false

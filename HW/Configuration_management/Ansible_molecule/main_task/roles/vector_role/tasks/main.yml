@@ -1,0 +1,445 @@
+---
+
+- name: Create centos user if not exists
+  become: true
+  ansible.builtin.user:
+    name: centos
+    state: present
+    shell: /bin/bash
+  when: ansible_facts['os_family'] == "RedHat"
+  failed_when: false
+  tags:
+    - always
+
+- name: Check if wget exists
+  ansible.builtin.command: wget --version
+  register: wget_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - always
+
+- name: Install wget when missing
+  become: true
+  ansible.builtin.package:
+    name: wget
+    state: present
+  when: wget_check.rc != 0
+  tags:
+    - always
+
+- name: Check vector setup script availability
+  ansible.builtin.command: wget --spider "{{ vector_setup_script }}"
+  register: vector_script_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - always
+
+- name: Install curl on all systems
+  when: docker | default(false)
+  tags:
+    - docker-vector
+  block:
+    - name: Install curl on Debian/Ubuntu
+      tags:
+        - docker-vector
+      ansible.builtin.apt:
+        name: curl
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Install curl on CentOS/RHEL/Fedora
+      tags:
+        - docker-vector
+      ansible.builtin.dnf:
+        disable_gpg_check: true
+        name: curl
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Install curl on Arch
+      tags:
+        - docker-vector
+      community.general.pacman:
+        name: curl
+        state: present
+      when: ansible_facts['os_family'] == "Archlinux"
+
+- name: Install Docker
+  when: docker | default(false)
+  tags:
+    - docker-vector
+  block:
+    - name: Check if Docker is installed
+      tags:
+        - docker-vector
+      ansible.builtin.command: which docker
+      register: docker_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install Docker on Debian/Ubuntu
+      tags:
+        - docker-vector
+      ansible.builtin.shell: bash -c "$(curl -fsSL https://get.docker.com)"
+      become: true
+      when: ansible_facts['os_family'] == "Debian" and docker_check.rc != 0
+      changed_when: docker_check.rc != 0
+
+    - name: Install Docker on CentOS/RHEL/Fedora
+      tags:
+        - docker-vector
+      ansible.builtin.shell: bash -c "$(curl -fsSL https://get.docker.com)"
+      become: true
+      when: ansible_facts['os_family'] == "RedHat" and docker_check.rc != 0
+      changed_when: docker_check.rc != 0
+
+    - name: Install Docker on Arch
+      tags:
+        - docker-vector
+      ansible.builtin.shell: bash -c "$(curl -fsSL https://get.docker.com)"
+      become: true
+      when: ansible_facts['os_family'] == "Archlinux" and docker_check.rc != 0
+      changed_when: docker_check.rc != 0
+
+    - name: Install Docker Compose plugin on Debian/Ubuntu
+      tags:
+        - docker-vector
+      ansible.builtin.apt:
+        name: docker-compose-plugin
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+      failed_when: false
+
+    - name: Install Docker Compose plugin on CentOS/RHEL/Fedora
+      tags:
+        - docker-vector
+      ansible.builtin.dnf:
+        disable_gpg_check: true
+        name: docker-compose-plugin
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+      failed_when: false
+
+    - name: Check if Docker Buildx exists
+      tags:
+        - docker-vector
+      ansible.builtin.stat:
+        path: ~/.docker/cli-plugins/docker-buildx
+      register: buildx_check
+
+    - name: Install Docker Buildx
+      tags:
+        - docker-vector
+      ansible.builtin.file:
+        path: ~/.docker/cli-plugins
+        state: directory
+        mode: '0755'
+      when: not buildx_check.stat.exists
+
+    - name: Download Docker Buildx
+      tags:
+        - docker-vector
+      ansible.builtin.get_url:
+        url: "{{ docker_buildx_url }}"
+        dest: "{{ docker_buildx_path }}"
+        mode: '0755'
+      when: not buildx_check.stat.exists
+      changed_when: true
+
+- name: Install Vector in Docker
+  when: docker | default(false) and not (helm | default(false))
+  tags:
+    - docker-vector
+  block:
+    - name: Check if docker-compose is installed
+      tags:
+        - docker-vector
+      ansible.builtin.command: which docker-compose
+      register: docker_compose_old
+      failed_when: false
+      changed_when: false
+
+    - name: Check if docker compose is installed
+      ansible.builtin.command: docker compose version
+      register: docker_compose_new
+      failed_when: false
+      changed_when: false
+
+    - name: Fail if neither docker-compose nor docker compose found
+      ansible.builtin.fail:
+        msg: "Neither docker-compose nor docker compose is installed. Cannot install Vector in Docker."
+      when: docker_compose_old.rc != 0 and docker_compose_new.rc != 0
+
+    - name: Create docker-compose.yml
+      become: true
+      ansible.builtin.template:
+        src: docker-compose.yml.j2
+        dest: "{{ vector_config_dir }}/docker-compose.yml"
+        mode: '0644'
+
+    - name: Install Docker Buildx (latest)
+      ansible.builtin.shell: |
+        set -o pipefail
+        ARCH=amd64
+        BUILDX_URL=$(curl -s https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json | \
+          jq -r ".latest.assets[] | select(endswith(\"linux-$ARCH\"))")
+        mkdir -vp ~/.docker/cli-plugins/
+        curl --silent -L --output ~/.docker/cli-plugins/docker-buildx $BUILDX_URL
+        chmod a+x ~/.docker/cli-plugins/docker-buildx
+      args:
+        executable: /bin/bash
+      failed_when: false
+      changed_when: true
+
+    - name: Build Vector image with buildx
+      ansible.builtin.shell: cd {{ vector_config_dir }} && docker buildx build -t vector:latest --load .
+      become: true
+      failed_when: false
+      changed_when: true
+
+    - name: Install Docker Compose plugin
+      ansible.builtin.shell: |
+        mkdir -p /usr/local/lib/docker/cli-plugins
+        curl -SL https://github.com/docker/compose/releases/download/v5.0.1/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+        chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      become: true
+      failed_when: false
+      changed_when: true
+
+    - name: Run docker compose up
+      community.docker.docker_compose_v2:
+        project_src: "{{ vector_config_dir }}"
+        state: present
+      become: true
+      failed_when: false
+      environment:
+        DOCKER_MEMORY_LIMIT: "{{ docker_memory_limit }}"
+        DOCKER_CPU_LIMIT: "{{ docker_cpu_limit }}"
+        VECTOR_LOG_DIR: "{{ vector_log_dir }}"
+        VECTOR_CONFIG_DIR: "{{ vector_config_dir }}"
+        TELEMETRY_PORT: "{{ telemetry_port }}"
+        LOKI_ENDPOINT: "{{ loki_endpoint }}"
+        LOKI_PORT: "{{ loki_port }}"
+        ELASTICSEARCH_ENDPOINT: "{{ elasticsearch_endpoint }}"
+        ELASTICSEARCH_PORT: "{{ elasticsearch_port }}"
+
+
+- name: Install Vector on host
+  when: not (docker | default(false)) and not (helm | default(false))
+  tags: [systemd-vector]
+  block:
+
+    ###########################################################################
+    # 0. Check if Vector is already installed (ONE TIME ONLY)
+    ###########################################################################
+    - name: Check if vector is installed
+      ansible.builtin.command: which vector
+      register: vector_check
+      changed_when: false
+      failed_when: false
+
+
+    ###########################################################################
+    # 1. Debian / Ubuntu
+    ###########################################################################
+    - name: Install Vector on Debian/Ubuntu
+      when:
+        - ansible_facts['os_family'] == "Debian"
+        - vector_check.rc != 0
+      block:
+
+        - name: Download Vector setup script (Debian/Ubuntu)
+          ansible.builtin.get_url:
+            url: "https://setup.vector.dev"
+            dest: /tmp/vector-setup.sh
+            mode: '0755'
+
+        - name: Run Vector setup script (Debian/Ubuntu)
+          become: true
+          ansible.builtin.command: /tmp/vector-setup.sh --yes
+          args:
+            creates: "{{ vector_bin | default('/usr/bin/vector') }}"
+
+        - name: Install vector package (Debian/Ubuntu)
+          become: true
+          ansible.builtin.apt:
+            name: vector
+            state: present
+            update_cache: yes
+
+
+    ###########################################################################
+    # 2. RedHat / CentOS / Fedora / OracleLinux
+    ###########################################################################
+    - name: Install Vector on RedHat family
+      when:
+        - ansible_facts['os_family'] == "RedHat"
+        - vector_check.rc != 0
+      block:
+
+        - name: Download Vector setup script (RedHat)
+          ansible.builtin.get_url:
+            url: "https://setup.vector.dev"
+            dest: /tmp/vector-setup.sh
+            mode: '0755'
+
+        - name: Run Vector setup script (RedHat)
+          become: true
+          ansible.builtin.command: /tmp/vector-setup.sh --yes
+          args:
+            creates: "{{ vector_bin | default('/usr/bin/vector') }}"
+
+        - name: Install vector package (RedHat)
+          become: true
+          ansible.builtin.package:
+            name: vector
+            state: present
+
+
+    ###########################################################################
+    # 3. Arch Linux
+    ###########################################################################
+    - name: Install Vector on Arch
+      become: true
+      community.general.pacman:
+        name: vector
+        state: present
+      when:
+        - ansible_facts['os_family'] == "Archlinux"
+        - vector_check.rc != 0
+
+- name: Create vector config directory
+  become: true
+  tags:
+    - systemd-vector
+  ansible.builtin.file:
+    path: "{{ vector_config_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ 'centos' if ansible_facts['os_family'] == 'RedHat' else 'root' }}"
+    group: "{{ 'centos' if ansible_facts['os_family'] == 'RedHat' else 'root' }}"
+  when: not (docker | default(false)) and not (helm | default(false))
+
+- name: Create vector log directory
+  when: not (docker | default(false)) and not (helm | default(false))
+  become: true
+  tags:
+    - systemd-vector
+  ansible.builtin.file:
+    path: "{{ vector_log_dir }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Build list of log source directories (safe, unique)
+  ansible.builtin.set_fact:
+    log_source_dirs: >-
+      {{ [
+          (syslog_files[0]     | default('')),
+          (nginx_access_logs[0]| default('')),
+          (postgres_logs[0]    | default('')),
+          (redis_logs[0]       | default(''))
+        ]
+        | map('regex_replace', '/[^/]*$','')
+        | reject('equalto','')
+        | list
+        | unique }}
+  changed_when: false
+  tags:
+    - vector
+
+- name: Ensure log source directories exist (best effort, idempotent)
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  loop: "{{ log_source_dirs }}"
+  when:
+    - not (docker | default(false))
+    - not (helm | default(false))
+    - log_source_dirs | length > 0
+  tags:
+    - vector
+
+- name: Flush handlers
+  when: helm | default(false)
+  tags:
+    - helm
+  ansible.builtin.meta: flush_handlers
+
+- name: Create Ansible directories
+  tags:
+    - systemd-vector
+    - docker-vector
+  block:
+    - name: Create Ansible_playbook/main_task directory
+      ansible.builtin.file:
+        path: "{{ ansible_playbook_dir }}"
+        state: directory
+        mode: '0755'
+
+- name: Install Vector via Helm
+  when: helm | default(false)
+  tags:
+    - helm
+  block:
+    - name: Add Vector Helm repo
+      ansible.builtin.shell: helm repo add vector https://helm.vector.dev && helm repo update
+      args:
+        creates: ~/.helm/repositories.yaml
+      changed_when: true
+      tags:
+        - helm
+
+    - name: Create vector namespace
+      ansible.builtin.shell: |
+        set -o pipefail
+        kubectl create namespace vector --dry-run=client -o yaml | kubectl apply -f -
+      args:
+        executable: /bin/bash
+      changed_when: true
+      tags:
+        - helm
+
+    - name: Install Vector Agent via Helm
+      ansible.builtin.shell: |
+        helm install vector vector/vector \
+          --namespace vector \
+          --create-namespace \
+          --values values.yaml
+      when: helm_role | default("Aggregator") == "Agent"
+      changed_when: true
+      tags:
+        - helm
+
+    - name: Install Vector Aggregator via Helm
+      ansible.builtin.shell: |
+        helm install vector vector/vector \
+          --namespace vector \
+          --create-namespace
+      when: helm_role | default("Aggregator") == "Aggregator"
+      changed_when: true
+
+    - name: Update Vector Helm deployment
+      ansible.builtin.shell: |
+        helm repo update && \
+        helm upgrade vector vector/vector \
+          --namespace vector \
+          --reuse-values
+      changed_when: true
+
+- name: Check Vector is running
+  ansible.builtin.command: pgrep -a vector
+  register: vector_status
+  changed_when: false
+  failed_when: false
+
+- name: Show Vector status
+  ansible.builtin.debug:
+    msg: "{{ inventory_hostname }} ({{ ansible_facts['os_family'] }}): {{ vector_status.stdout | default('vector not running') }}"

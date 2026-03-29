@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: LAO
+  description: Lighthouse Centos 7 role
+  license: MIT
+  min_ansible_version: '2.10'
+  platforms:
+    - name: 
+      versions:
+        - all
+dependencies: []

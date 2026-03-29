@@ -1,0 +1,139 @@
+---
+# roles/lighthouse/tasks/main.yml
+- name: Include ClickHouse variables
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../clickhouse_role/vars/main.yml"
+  tags: always
+
+- name: Install packages
+  ansible.builtin.include_tasks:
+    file: yum.yml
+  tags: always
+
+- name: Create nginx user if not exists
+  become: true
+  ansible.builtin.user:
+    name: nginx
+    state: present
+    shell: /bin/bash
+    create_home: false
+  tags: always
+
+- name: Lighthouse Create web directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ clickhouse_www_path }}"
+    state: directory
+    mode: '0755'
+    owner: nginx
+    group: nginx
+  tags: lighthouse
+
+- name: Get existing git safe.directory entries
+  become: true
+  ansible.builtin.command:
+    cmd: git config --global --get-all safe.directory
+  register: git_safe
+  failed_when: false
+  changed_when: false
+  tags: lighthouse
+
+- name: Add git safe.directory if missing
+  become: true
+  ansible.builtin.command:
+    cmd: git config --global --add safe.directory "{{ clickhouse_www_path }}"
+  when: git_safe.stdout_lines is not defined or (clickhouse_www_path not in git_safe.stdout_lines)
+  tags: lighthouse
+
+- name: Lighthouse clone or update repo
+  become: true
+  ansible.builtin.git:
+    repo: "{{ clickhouse_git_url }}"
+    dest: "{{ clickhouse_www_path }}"
+    version: master
+    update: yes
+    force: no
+    accept_hostkey: yes
+  tags: lighthouse
+
+- name: Create /etc/nginx directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/nginx
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  tags: lighthouse
+
+- name: Create htpasswd file for basic auth (idempotent)
+  become: true
+  ansible.builtin.stat:
+    path: "{{ clickhouse_htpasswd_file }}"
+  register: htpasswd_stat
+  tags: lighthouse
+
+- name: Write htpasswd when missing
+  become: true
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo -n "{{ clickhouse_user }}:" > {{ clickhouse_htpasswd_file }}
+    echo "{{ clickhouse_password }}" | openssl passwd -stdin >> {{ clickhouse_htpasswd_file }}
+  args:
+    executable: /bin/bash
+  when: not htpasswd_stat.stat.exists
+  tags: lighthouse
+
+- name: Ensure htpasswd ownership and mode
+  become: true
+  ansible.builtin.file:
+    path: "{{ clickhouse_htpasswd_file }}"
+    owner: nginx
+    group: nginx
+    mode: '0640'
+  when: htpasswd_stat is defined
+  tags: lighthouse
+
+- name: Configure and manage nginx
+  ansible.builtin.include_tasks:
+    file: nginx.yml
+  tags: lighthouse
+
+- name: Create Lighthouse config directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ clickhouse_www_path }}/config"
+    state: directory
+    mode: "0755"
+    owner: nginx
+    group: nginx
+  tags: lighthouse
+
+- name: Create ClickHouse connection config
+  become: true
+  ansible.builtin.template:
+    src: clickhouse-config.json.j2
+    dest: "{{ clickhouse_www_path }}/config/clickhouse.json"
+    mode: "0644"
+    owner: nginx
+    group: nginx
+  tags: lighthouse
+
+- name: Wait for Lighthouse HTTP to respond
+  ansible.builtin.uri:
+    url: "http://localhost:8123"
+    return_content: no
+    status_code: 200
+    timeout: 5
+  register: clickhouse_response
+  retries: 6
+  delay: 5
+  until: clickhouse_response.status == 200
+  failed_when: false
+  changed_when: false
+  tags: lighthouse
+
+- name: Display Lighthouse HTTP response with status code
+  ansible.builtin.debug:
+    msg: "{{ [clickhouse_response.status | default('no-status'), clickhouse_response.elapsed | default('no-elapsed')] }}"
+  tags: lighthouse
