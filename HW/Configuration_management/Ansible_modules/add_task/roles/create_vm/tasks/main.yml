@@ -1,0 +1,19 @@
+---
+- name: Create VM
+  yandex.cloud.yc_compute_instance:
+    name: "{{ vm_name }}"
+    state: present
+    cores: "{{ vm_cores }}"
+    memory: "{{ vm_memory }}"
+    disk:
+      - auto_delete: true
+        boot_disk:
+          mode: READ_WRITE
+          initialize_params:
+            image_id: "{{ image_id }}"
+            size: "{{ vm_disk_size }}"
+    network_interfaces:
+      - name: eth0
+        primary: true
+        subnet_id: "{{ subnet_id }}"
+        nat: true

@@ -1,0 +1,15 @@
+namespace: slateeho
+name: yc_instance
+version: 1.0.0
+authors:
+  - slateeho
+description: Ansible collection for creating Yandex Cloud VMs
+license:
+  - MIT
+tags:
+  - yandex
+  - cloud
+  - vm
+dependencies: {}
+repository: https://github.com/slateeho/devops-netology
+readme: README.md

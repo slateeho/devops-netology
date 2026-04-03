@@ -98,3 +98,37 @@
 
 </details>
 
+<details>
+<summary>6. Создание собственных модулей</summary>
+
+`Обязатеьная часть`
+
+[README.md по модулю `anyhostupload`](Ansible_modules/README.md)
+
+
+![](Ansible_modules/main_task/pngs/1.png)
+---
+![](Ansible_modules/main_task/pngs/2.png)
+---
+![](Ansible_modules/main_task/pngs/3.png)
+---
+![](Ansible_modules/main_task/pngs/4.png)
+
+
+`Необязательная часть`
+
+![](Ansible_modules/add_task/pngs/1.png)
+---
+![](Ansible_modules/add_task/pngs/2.png)
+
+[README.md по модулю `yc_vmm`](Ansible_modules/add_task/README.md)
+
+Ansible Galaxy:
+
+```shell
+ansible-galaxy collection install slateeho.anyhostupload
+ansible-galaxy collection install slateeho.yc_instance
+ansible-galaxy collection install slateeho.infrastructure
+```
+
+</details>

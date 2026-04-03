@@ -1,0 +1,8 @@
+---
+# defaults file for create_vm
+vm_name: "test-vm"
+vm_cores: 2
+vm_memory: 2
+vm_disk_size: 10
+image_id: "fd8e9t6fpgi13oh7q39f"  # Debian
+subnet_id: ""

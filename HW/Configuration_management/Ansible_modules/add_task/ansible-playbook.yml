@@ -1,0 +1,83 @@
+---
+- name: Create VM and deploy ClickHouse, Vector, Lighthouse
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    yc_token: "{{ lookup('env', 'YC_TOKEN') }}"
+    cloud_id: "{{ lookup('env', 'YC_CLOUD_ID') }}"
+    folder_id: "{{ lookup('env', 'YC_FOLDER_ID') }}"
+    subnet_id: "{{ lookup('env', 'YC_SUBNET_ID') }}"
+    vm_name: "test-vm"
+    zone: "ru-central1-a"
+    image_id: "fd8e9t6fpgi13oh7q39f"
+    ssh_pub_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGoopvlAayexQloT7qPHAShw/xWTWgMFwG0oHKeG+Wu3 ansible@yandex-cloud"
+
+  tasks:
+    - name: Create VM with yandex.cloud.ycc_vm module
+      yandex.cloud.ycc_vm:
+        auth:
+          token: "{{ yc_token }}"
+        name: "{{ vm_name }}"
+        folder_id: "{{ folder_id }}"
+        zone_id: "{{ zone }}"
+        platform_id: "Intel Cascade Lake"
+        cores: 2
+        memory: 2
+        core_fraction: 20
+        image_id: "{{ image_id }}"
+        disk_type: hdd
+        disk_size: 10
+        subnet_id: "{{ subnet_id }}"
+        assign_public_ip: true
+        login: debian
+        public_ssh_key: "{{ ssh_pub_key }}"
+        labels:
+          environment: test
+        state: present
+      register: vm_info
+
+    - name: Set VM public IP from vm_info
+      set_fact:
+        vm_public_ip: "{{ vm_info.response.networkInterfaces[0].primaryV4Address.oneToOneNat.address }}"
+
+    - name: Show VM public IP
+      debug:
+        msg: "VM Public IP: {{ vm_public_ip }}"
+
+    - name: Add host to dynamic inventory
+      add_host:
+        name: "{{ vm_public_ip }}"
+        groups: dynamic_hosts
+        ansible_user: debian
+        ansible_ssh_private_key_file: /tmp/id_ed25519
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+
+    - name: Wait for SSH to become available (20 seconds delay)
+      wait_for:
+        host: "{{ vm_public_ip }}"
+        port: 22
+        delay: 20
+        timeout: 300
+      delegate_to: localhost
+
+- name: Deploy ClickHouse, Vector, Lighthouse
+  hosts: dynamic_hosts
+  become: true
+  gather_facts: true
+  pre_tasks:
+    - name: Install git
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+    - name: Create /var/www directory
+      file:
+        path: /var/www
+        state: directory
+        mode: '0755'
+  roles:
+    - slateeho.infrastructure.clickhouse_role
+    - slateeho.infrastructure.vector_role
+    - slateeho.infrastructure.lighthouse
