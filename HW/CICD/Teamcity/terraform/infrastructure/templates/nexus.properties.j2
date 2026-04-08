@@ -1,0 +1,13 @@
+# Jetty section
+application-host={{ nexus_host }}
+application-port={{ nexus_port }}
+nexus-context-path={{ nexus_context_path }}
+
+# Nexus section
+nexus-edition={{ nexus_edition }}
+nexus-features=\
+ {{ nexus_features }}
+
+# Database - H2 for Java 17 compatibility
+nexus.datastore.enabled=true
+nexus.datastore.nexus.jdbcUrl=jdbc:h2:file:{{ nexus_directory_data }}/db/nexus

@@ -1,0 +1,26 @@
+services:
+  teamcity:
+    image: jetbrains/teamcity-server
+    container_name: teamcity
+    ports:
+      - "8111:8111"
+    volumes:
+      - /opt/teamcity/data:/data/teamcity_server/datadir
+      - /opt/teamcity/logs:/opt/teamcity/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8111"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  teamcity-agent:
+    image: jetbrains/teamcity-agent
+    container_name: teamcity-agent
+    depends_on:
+      teamcity:
+        condition: service_healthy
+    environment:
+      SERVER_URL: "http://teamcity:8111"
+    volumes:
+      - /opt/teamcity/agent/conf:/data/teamcity_agent/conf
+      - /opt/teamcity/agent/work:/opt/buildagent/work

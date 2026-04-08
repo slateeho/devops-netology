@@ -1,0 +1,404 @@
+---
+- name: Install and run TeamCity Server
+  hosts: teamcity-server
+  become: yes
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+      tags: [common, packages, teamcity-server]y
+      
+
+    - name: Check if Docker is installed
+      ansible.builtin.command: which docker
+      register: docker_check
+      failed_when: false
+      changed_when: false
+      tags: [docker, teamcity-server]
+
+    - name: Install Docker block
+      when: docker | default(false) and docker_check.rc != 0
+      tags: [docker, teamcity-server]
+      block:
+        - name: Install Docker
+          ansible.builtin.shell: bash -c "$(curl -fsSL https://get.docker.com)"
+          become: true
+          changed_when: true
+          tags: [docker, teamcity-server]
+
+        - name: Install Docker Compose plugin
+          ansible.builtin.apt:
+            name: docker-compose-plugin
+            state: present
+          when: ansible_facts['os_family'] == "Debian"
+          failed_when: false
+          tags: [docker, teamcity-server]
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      when: docker | default(false)
+      tags: [docker, teamcity-server]
+
+    - name: Reset SSH connection to apply docker group
+      meta: reset_connection
+      when: docker | default(false)
+      tags: [docker, teamcity-server]
+
+    - name: Create TeamCity Server directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: 1000
+        group: 1000
+        mode: '0755'
+      with_items:
+        - /opt/teamcity
+        - /opt/teamcity/data
+        - /opt/teamcity/logs
+      tags: [teamcity-server, directories]
+
+    - name: Copy TeamCity Server docker-compose
+      copy:
+        content: |
+          services:
+            teamcity:
+              image: jetbrains/teamcity-server
+              container_name: teamcity
+              ports:
+                - "8111:8111"
+              volumes:
+                - /opt/teamcity/data:/data/teamcity_server/datadir
+                - /opt/teamcity/logs:/opt/teamcity/logs
+                - /opt/repos:/opt/repos
+              restart: unless-stopped
+        dest: /opt/teamcity/docker-compose.yml
+      tags: [teamcity-server, compose]
+
+    - name: Start TeamCity Server
+      command: docker compose up -d
+      args:
+        chdir: /opt/teamcity
+      when: docker | default(false)
+      tags: [teamcity-server, compose, start]
+
+
+- name: Install and run TeamCity Agent
+  hosts: teamcity-agent
+  become: yes
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+      tags: [common, packages, teamcity-agent]
+
+    - name: Check if Docker is installed
+      ansible.builtin.command: which docker
+      register: docker_check
+      failed_when: false
+      changed_when: false
+      tags: [docker, teamcity-agent]
+
+    - name: Install Docker block
+      when: docker | default(false) and docker_check.rc != 0
+      tags: [docker, teamcity-agent]
+      block:
+        - name: Install Docker
+          ansible.builtin.shell: bash -c "$(curl -fsSL https://get.docker.com)"
+          become: true
+          changed_when: true
+          tags: [docker, teamcity-agent]
+
+        - name: Install Docker Compose plugin
+          ansible.builtin.apt:
+            name: docker-compose-plugin
+            state: present
+          when: ansible_facts['os_family'] == "Debian"
+          failed_when: false
+          tags: [docker, teamcity-agent]
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      when: docker | default(false)
+      tags: [docker, teamcity-agent]
+
+    - name: Reset SSH connection to apply docker group
+      meta: reset_connection
+      when: docker | default(false)
+      tags: [docker, teamcity-agent]
+
+    - name: Create TeamCity Agent directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: 1000
+        group: 1000
+        mode: '0755'
+      with_items:
+        - /opt/teamcity
+        - /opt/teamcity/agent/conf
+        - /opt/teamcity/agent/work
+      tags: [teamcity-agent, directories]
+
+    - name: Copy TeamCity Agent docker-compose
+      copy:
+        content: |
+          services:
+            teamcity-agent:
+              image: jetbrains/teamcity-agent
+              container_name: teamcity-agent
+              environment:
+                SERVER_URL: "{{ teamcity_server_url | default('http://debian-1:8111') }}"
+              volumes:
+                - /opt/teamcity/agent/conf:/data/teamcity_agent/conf
+                - /opt/teamcity/agent/work:/opt/buildagent/work
+              restart: unless-stopped
+        dest: /opt/teamcity/docker-compose.yml
+      tags: [teamcity-agent, compose]
+
+    - name: Start TeamCity Agent
+      command: docker compose up -d
+      args:
+        chdir: /opt/teamcity
+      when: docker | default(false)
+      tags: [teamcity-agent, compose, start]
+
+
+- name: Install and configure Nexus
+  hosts: nexus
+  become: true
+  vars_files:
+    - inventory/cicd/group_vars/nexus.yml
+  vars:
+    nexus_user_group: "nexus"
+    nexus_user_name: "nexus"
+
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      become: true
+      tags: [common, packages, nexus]
+
+    - name: Create Nexus group
+      group:
+        name: "{{ nexus_user_group }}"
+        state: present
+      tags: [nexus, user]
+
+    - name: Create Nexus user
+      user:
+        name: "{{ nexus_user_name }}"
+        group: "{{ nexus_user_group }}"
+        home: "/home/{{ nexus_user_name }}"
+        shell: /bin/bash
+      tags: [nexus, user]
+
+    - name: Install Java 17 packages
+      apt:
+        name:
+          - openjdk-17-jdk
+          - openjdk-17-jdk-headless
+        state: present
+      become: true
+      tags: [java, nexus]
+
+    - name: Verify Java is installed
+      ansible.builtin.command: java -version
+      register: java_check
+      changed_when: false
+      tags: [java, nexus]
+
+    - name: Set JAVA_HOME for nexus user
+      lineinfile:
+        create: yes
+        dest: "/home/{{ nexus_user_name }}/.bashrc"
+        insertafter: EOF
+        line: "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+        regexp: "^export JAVA_HOME"
+      become: true
+      tags: [java, nexus, config]
+
+  tasks:
+    - name: Temporarily disable SELinux
+      command: setenforce 0
+      become: true
+      ignore_errors: true
+      when: ansible_os_family == 'RedHat'
+      tags: [common, selinux, nexus]
+
+    - name: Clean corrupted work directory for H2 fresh install
+      file:
+        path: "{{ nexus_directory_data }}"
+        state: absent
+      become: true
+      tags: [nexus, clean]
+
+    - name: Create Nexus directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ nexus_user_name }}"
+        group: "{{ nexus_user_group }}"
+        mode: 0755
+        recurse: yes
+      with_items:
+        - "{{ nexus_directory_log }}"
+        - "{{ nexus_directory_data }}"
+        - "{{ nexus_directory_data }}/etc"
+        - "{{ nexus_directory_package }}"
+        - "{{ nexus_directory_tmp }}"
+      tags: [nexus, directories]
+
+    - name: Download Nexus archive
+      get_url:
+        dest: "{{ nexus_directory_package }}/nexus-{{ nexus_version }}.tar.gz"
+        url: "{{ nexus_download_url }}/nexus-{{ nexus_version }}-unix.tar.gz"
+        validate_certs: false
+        owner: "{{ nexus_user_name }}"
+        group: "{{ nexus_user_group }}"
+        mode: '0644'
+      become: true
+      tags: [nexus, download]
+
+    - name: Unpack Nexus
+      unarchive:
+        copy: no
+        creates: "{{ nexus_directory_package }}/nexus-{{ nexus_version }}"
+        dest: "{{ nexus_directory_package }}"
+        src: "{{ nexus_directory_package }}/nexus-{{ nexus_version }}.tar.gz"
+        owner: "{{ nexus_user_name }}"
+        group: "{{ nexus_user_group }}"
+      become: true
+      tags: [nexus, install]
+
+    - name: Create symlink to Nexus home
+      file:
+        dest: "{{ nexus_directory_home }}"
+        src: "{{ nexus_directory_package }}/nexus-{{ nexus_version }}"
+        state: link
+        owner: "{{ nexus_user_name }}"
+        group: "{{ nexus_user_group }}"
+      become: true
+      tags: [nexus, install]
+
+    - name: Add NEXUS_HOME to bashrc
+      lineinfile:
+        create: yes
+        dest: "/home/{{ nexus_user_name }}/.bashrc"
+        insertafter: EOF
+        line: "export NEXUS_HOME={{ nexus_directory_home }}"
+      become: true
+      tags: [nexus, config]
+
+    - name: Configure run_as_user in nexus.rc
+      lineinfile:
+        create: yes
+        dest: "{{ nexus_directory_home }}/bin/nexus.rc"
+        insertafter: EOF
+        line: "run_as_user=\"{{ nexus_user_name }}\""
+        regexp: "^run_as_user"
+      become: true
+      tags: [nexus, config]
+
+    - name: Raise nofile limit
+      pam_limits:
+        domain: "{{ nexus_user_name }}"
+        limit_type: "-"
+        limit_item: nofile
+        value: "{{ nexus_ulimit }}"
+      become: true
+      tags: [nexus, config, limits]
+
+    - name: Create systemd service
+      template:
+        dest: /lib/systemd/system/nexus.service
+        mode: 0644
+        src: nexus.systemd.j2
+      become: true
+      tags: [nexus, systemd]
+
+    - name: Enable Nexus service
+      systemd:
+        daemon_reload: yes
+        enabled: yes
+        name: nexus
+      when: nexus_service_enabled | default(true)
+      become: true
+      tags: [nexus, systemd]
+
+    - name: Configure H2 database for Java 17 compatibility
+      lineinfile:
+        create: yes
+        dest: "{{ nexus_directory_data }}/etc/nexus.properties"
+        insertafter: EOF
+        line: "{{ item }}"
+      with_items:
+        - "nexus.datastore.enabled=true"
+        - "nexus.datastore.nexus.jdbcUrl=jdbc:h2:file:{{ nexus_directory_data }}/db/nexus"
+      become: true
+      tags: [nexus, config, database]
+
+    - name: Create vmoptions
+      template:
+        dest: "{{ nexus_directory_home }}/bin/nexus.vmoptions"
+        src: nexus.vmoptions.j2
+        owner: "{{ nexus_user_name }}"
+        group: "{{ nexus_user_group }}"
+      register: nexus_config_changed
+      become: true
+      tags: [nexus, config, vmoptions]
+
+    - name: Create properties
+      template:
+        dest: "{{ nexus_directory_data }}/etc/nexus.properties"
+        src: nexus.properties.j2
+        owner: "{{ nexus_user_name }}"
+        group: "{{ nexus_user_group }}"
+      register: nexus_config_changed
+      become: true
+      tags: [nexus, config, properties]
+
+    - name: Configure disk space threshold
+      lineinfile:
+        backrefs: yes
+        dest: "{{ nexus_directory_home }}/etc/karaf/system.properties"
+        insertafter: EOF
+        line: "storage.diskCache.diskFreeSpaceLimit={{ nexus_configuration_disk_free_space_limit }}"
+        regexp: ^storage\.diskCache\.diskFreeSpaceLimit
+      when: nexus_configuration_disk_free_space_limit is not none
+      become: true
+      tags: [nexus, config]
+
+    - name: Start Nexus service
+      service:
+        enabled: yes
+        name: nexus
+        state: started
+      when: nexus_service_start_on_boot | default(true)
+      become: true
+      tags: [nexus, start, service]
+
+    - name: Wait for Nexus port
+      wait_for:
+        port: "{{ nexus_port }}"
+        timeout: "{{ nexus_port_check_timeout | default(600) }}"
+      tags: [nexus, start, wait]

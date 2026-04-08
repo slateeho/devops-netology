@@ -212,5 +212,8 @@ test/units/.coverage.*
 changelogs/.plugin-cache.yaml
 .ansible-test-timeout.json
 *.rpm
-id_ed
+id_ed25519*
+*.pem
+*.key
 *.tar.gz
+*.jar
