@@ -217,3 +217,7 @@ id_ed25519*
 *.key
 *.tar.gz
 *.jar
+HW/Observability/Monitoring_systems/data/
+*.db
+HW/Observability/Monitoring_systems/data/influxdb/
+!HW/Observability/Monitoring_systems/awesome_monitoring/*.log
