@@ -1,0 +1,10 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/syslog
+      - /var/log/auth.log
+      - /var/log/kern.log
+
+output.logstash:
+  hosts: ["logstash:5000"]

@@ -142,3 +142,27 @@ SLA = (2xx + 3xx) / all_requests
 
 
 </details>
+
+<details>
+<summary>3. Система сбора логов Elastic Stack</summary>
+
+## Задание 1
+
+скриншот `docker ps` через `5 минут` после старта всех контейнеров (их должно быть 5):
+
+![docker ps](./ELK/pngs/1.png)
+
+скриншот интерфейса `kibana`:
+
+
+![kibana](./ELK/pngs/2.png)
+
+
+
+## Задание 2
+
+
+![kibana logs](./ELK/pngs/3.png)
+
+
+</details>
