@@ -166,3 +166,33 @@ SLA = (2xx + 3xx) / all_requests
 
 
 </details>
+</details>
+
+<details>
+<summary>4. Платформа мониторинга Sentry</summary>
+
+## Задание 1
+
+
+![sentry0](./Sentry/pngs/0.png)
+
+## Задание 2
+
+[sample_sentry_script](Sentry/py_sentry/sentry_homework.py)
+
+![sentry1](./Sentry/pngs/1.png)
+
+## Задание 3
+
+
+![sentry2](./Sentry/pngs/2.png)
+
+## Задание повышенной сложности
+
+
+[awesome_monitoring_sentry_script](Sentry/py_sentry/sentry_monitoring.py)
+![sentry3](./Sentry/pngs/3.png)
+
+</details>
+
+
