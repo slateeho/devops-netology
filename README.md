@@ -24,3 +24,7 @@ devops-netology
 ## [Мониторинг и логи](./HW/Observability/README.md)
 * 7 апреля — 21 апреля
 
+## [Микросервисы](./HW/Microservices/README.md)
+
+* 30 апреля — 18 мая
+
