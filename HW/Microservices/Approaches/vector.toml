@@ -1,0 +1,13 @@
+[sources.docker]
+type = "docker"
+socket = "/var/run/docker.sock"
+
+[sinks.elasticsearch]
+type = "elasticsearch"
+inputs = ["docker"]
+endpoint = "http://elasticsearch:9200"
+index = "logs-%Y.%m.%d"
+auth.strategy = "basic"
+auth.user = "elastic"
+auth.password = "qwerty123456"
+encoding.timestamp_format = "rfc3339"

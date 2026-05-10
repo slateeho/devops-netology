@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - logs_network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - KIBANA_DEFAULTAPPID=discover
+    ports:
+      - "8081:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - logs_network
+
+  vector:
+    image: timberio/vector:0.34.0-alpine
+    container_name: vector
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - logs_network
+
+volumes:
+  elasticsearch_data:
+
+networks:
+  logs_network:
+    driver: bridge
