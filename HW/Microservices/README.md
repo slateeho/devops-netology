@@ -195,3 +195,95 @@ http {
 
 </details>
 
+
+<details>
+<summary>3. Микросервисы: подходы</summary>
+
+---
+
+## Задача 1: Обеспечение процесса разработки (CI/CD)
+
+**Выбор: GitLab CI**
+
+| Требование | Реализация в GitLab CI |
+|------------|------------------------|
+| Облачная система | GitLab.com или self-hosted |
+| Git + репозиторий на сервис | Встроенный Git + группы/проекты |
+| Сборка по событию | Webhooks, merge request, push |
+| Сборка по кнопке с параметрами | Manual triggers с variables |
+| Настройки на сборку | CI/CD variables (pipeline, job level) |
+| Шаблоны конфигураций | `.gitlab-ci.yml` с `include` |
+| Безопасное хранение секретов | GitLab CI variables, Vault integration |
+| Несколько конфигураций | Matrix jobs, rules |
+| Кастомные шаги | Custom scripts, extensions |
+| Свои докер-образы | Kaniko, Buildah, Docker executor |
+| Агенты на своих серверах | GitLab Runner (self-hosted) |
+| Параллельные сборки | Parallel jobs, matrix strategy |
+| Параллельные тесты | `parallel` keyword, test splitting |
+
+**Обоснование:** GitLab CI полностью покрывает все требования "из коробки": встроенный Git-репозиторий, CI/CD, реестр образов, Container Registry, Vault для секретов, и возможность подключения собственных раннеров.
+
+---
+
+## Задача 2: Сбор и анализ логов
+
+**Выбор: ELK-стек (Elasticsearch + Logstash + Kibana)**
+
+| Требование | Реализация |
+|------------|------------|
+| Сбор со всех хостов | Beats (Filebeat) или Fluentd |
+| stdout | Децентрализованный сбор via agent |
+| Гарантированная доставка | Beats persistent queue, retry |
+| Поиск/фильтрация | Elasticsearch full-text |
+| UI для разработчиков | Kibana с sharing links |
+| Ссылка на сохранённый поиск | Kibana Saved Objects |
+
+**Обоснование:** ELK — индустриальный стандарт с лучшим поиском (DSL).
+
+---
+
+## Задача 3: Мониторинг
+
+**Выбор: Prometheus + Grafana**
+
+| Требование | Реализация |
+|------------|------------|
+| Сбор метрик с хостов | node_exporter |
+| Ресурсы хостов (CPU/RAM/HDD/Network) | node_exporter |
+| Метрики сервисов | cAdvisor, приложения |
+| Специфичные метрики сервисов | Custom exporters, /metrics endpoint |
+| Запросы и агрегация | PromQL, Prometheus |
+| Дашборды | Grafana |
+
+**Обоснование:** Prometheus + Grafana — стандарт для cloud-native мониторинга.
+
+---
+
+## Задача 4: ELK + Vector (практика)
+
+Файлы в директории `Approaches/`:
+- [docker-compose-logs.yml](Approaches/docker-compose-logs.yml) — запуск Vector + Elasticsearch + Kibana
+- [vector.toml](Approaches/vector.toml) — конфигурация Vector
+
+Запуск: `docker compose -f docker-compose-logs.yml up -d`
+Доступ: http://localhost:8081 (Kibana)
+Логин: admin / qwerty123456
+
+---
+
+## Задача 5: Prometheus + Grafana (практика)
+
+Файлы в директории `Approaches/`:
+- [docker-compose-monitoring.yml](Approaches/docker-compose-monitoring.yml) — запуск Prometheus + Grafana
+- [prometheus.yml](Approaches/prometheus.yml) — конфигурация scrape для security, uploader, storage
+- [dashboards/dashboard.yml](Approaches/dashboards/dashboard.yml) — provisioning дашбордов
+- [dashboards/requests-by-service.json](Approaches/dashboards/requests-by-service.json) — дашборд распределения запросов
+- [datasources/datasources.yml](Approaches/datasources/datasources.yml) — подключение Prometheus
+
+Запуск: `docker compose -f docker-compose-monitoring.yml up -d`
+Доступ: http://localhost:8081 (Grafana)
+Логин: admin / qwerty123456
+
+
+
+</details>
