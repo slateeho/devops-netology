@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume-0
+  labels:
+    type: local
+spec:
+  storageClassName: default
+  capacity:
+    storage: 750Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/k8s/pv-0"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume-1
+  labels:
+    type: local
+spec:
+  storageClassName: default
+  capacity:
+    storage: 750Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/k8s/pv-1"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume-2
+  labels:
+    type: local
+spec:
+  storageClassName: default
+  capacity:
+    storage: 750Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/k8s/pv-2"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume-3
+  labels:
+    type: local
+spec:
+  storageClassName: default
+  capacity:
+    storage: 750Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/k8s/pv-3"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume-4
+  labels:
+    type: local
+spec:
+  storageClassName: default
+  capacity:
+    storage: 750Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/k8s/pv-4"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume-5
+  labels:
+    type: local
+spec:
+  storageClassName: default
+  capacity:
+    storage: 750Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/k8s/pv-5"

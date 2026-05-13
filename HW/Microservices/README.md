@@ -1,7 +1,7 @@
 # Микросервисы
 
 <details>
-<summary> Микросервисы: принципы</summary>
+<summary>1. Микросервисы: принципы</summary>
 
 ## Задача 1 – API Gateway
 
@@ -285,5 +285,104 @@ http {
 Логин: admin / qwerty123456
 
 
+</details>
 
+<details>
+<summary>4. Микросервисы: масштабирование</summary>
+
+### Задача 1: Предложение по организации инфраструктуры
+
+Выбранное решение: использование Kubernetes как основной платформы для запуска и масштабирования микросервисов. K8s обеспечивает контейнеризацию, сервис-дискавери, маршрутизацию, масштабирование и безопасное хранение конфигураций.
+
+#### Компоненты решения
+
+| Компонент | Назначение | Реализация требований |
+|-----------|------------|------------------------|
+| Kubernetes | Оркестрация контейнеров, управление подами | Контейнеры, масштабирование, сервис-дискавери |
+| Service + Ingress | Внутренний DNS и внешняя маршрутизация | Обнаружение сервисов, HTTP/HTTPS маршрутизация |
+| HPA | Автоматическое масштабирование подов | Масштабирование по CPU/Memory/метрикам |
+| Cluster Autoscaler | Масштабирование узлов | Автоматическое добавление/удаление нод |
+| Network Policies | Сетевое разделение | Ограничение трафика между сервисами |
+| ConfigMap / Secret | Конфигурации и секреты | Переменные среды, безопасное хранение |
+| RBAC | Контроль доступа | Ограничение прав на ресурсы |
+| ETCD encryption | Шифрование данных | Защита секретов |
+| CI/CD | Автоматизация сборки и деплоя | Доставка обновлений в кластер |
+| Мониторинг (Prometheus/Grafana) | Метрики и алерты | Наблюдаемость и диагностика |
+
+#### Соответствие требованиям
+
+1. Поддержка контейнеров: Kubernetes запускает контейнеры через Pod, образы хранятся в registry.
+2. Обнаружение сервисов: CoreDNS создаёт DNS-записи, доступ по имени сервиса. Внешний доступ через Ingress/Ingress Controller.
+3. Горизонтальное масштабирование: изменение количества реплик подов в Deployment.
+4. Автоматическое масштабирование: HPA регулирует количество подов, Cluster Autoscaler масштабирует ноды.
+5. Разделение ресурсов: Network Policies, разные namespace, ограничение внешнего доступа через Ingress
+6. Конфигурации и секреты: ConfigMap для обычных параметров, Secret для чувствительных данных, шифрование etcd, RBAC, Sealed Secrets или External Secrets.
+
+Kubernetes выбран как наиболее зрелая и универсальная платформа, покрывающая все требования без дополнительных сложных решений.
+
+### Разделение ресурсов — Namespaces vs. Отдельный кластер
+
+| Критерий | Namespaces | Отдельный кластер |
+|----------|-----------|-------------------|
+| **Изоляция данных** | Логическая изоляция, данные хранятся в одном etcd | Полная физическая изоляция, свой etcd и control plane |
+| **Ресурсы** | Общие для всех namespaces, можно задавать квоты | Выделенные, полностью независимые ресурсы |
+| **Управление доступом** | RBAC работает на уровне namespace | Настраивается отдельно для каждого кластера |
+| **Безопасность** | Подходит для команд внутри одной компании | Лучше для разных компаний или клиентов (SaaS) |
+| **Стоимость и поддержка** | Дешевле: один control plane, меньше накладных расходов | Дороже: каждый кластер требует администрирования |
+| **Гибкость настройки** | Ограничена рамками общего кластера | Максимальная: разные версии K8s, плагины, политики |
+| **Применение** | Отделы внутри одной организации, разные окружения (dev/stage/prod) | Полная изоляция в финансовом секторе, госуслугах, multi-cloud |
+
+---
+
+### Задача 2: Распределённый кеш (Redis Cluster)
+
+Необходим k8s кластер Redis из трёх шардов, у каждого по одной реплике. Итого 6 узлов. Реализация через StatefulSet+Service, c предварительно поднятым PV, определенным для каждого элемента кластера PVC.
+
+```bash
+kubectl apply -f default-sc.yml
+kubectl apply -f pv.yml
+kubectl apply -f pvc.yml
+kubectl apply -f deploy-redis-cluster.yml
+```
+### Файлы конфигурации
+
+- [default-sc.yml](Scaling/default-sc.yml) — StorageClass для динамического выделения томов
+- [pv.yml](Scaling/pv.yml) — PersistentVolume для хранения данных Redis
+- [pvc.yml](Scaling/pvc.yml) — PersistentVolumeClaim для запроса хранилища
+- [deploy-redis-cluster.yml](Scaling/deploy-redis-cluster.yml) — Deployment Redis кластера
+
+### Инициализация кластера
+
+```shell
+i=($(kubectl get pods -l app=redis-cluster -o jsonpath='{range.items[*]}{.status.podIP}:6379 '))
+
+kubectl exec -it redis-cluster-0 -- redis-cli CLUSTER MEET ${i[1]%:*} 6379
+kubectl exec -it redis-cluster-0 -- redis-cli CLUSTER MEET ${i[2]%:*} 6379
+kubectl exec -it redis-cluster-0 -- redis-cli CLUSTER MEET ${i[3]%:*} 6379
+kubectl exec -it redis-cluster-0 -- redis-cli CLUSTER MEET ${i[4]%:*} 6379
+kubectl exec -it redis-cluster-0 -- redis-cli CLUSTER MEET ${i[5]%:*} 6379
+
+i_m1=$(kubectl exec -it redis-cluster-0 -- redis-cli CLUSTER MYID)
+i_m2=$(kubectl exec -it redis-cluster-1 -- redis-cli CLUSTER MYID)
+i_m3=$(kubectl exec -it redis-cluster-2 -- redis-cli CLUSTER MYID)
+v_r1=$(kubectl exec -it redis-cluster-3 -- redis-cli CLUSTER MYID)
+v_r2=$(kubectl exec -it redis-cluster-4 -- redis-cli CLUSTER MYID)
+v_r3=$(kubectl exec -it redis-cluster-5 -- redis-cli CLUSTER MYID)
+
+kubectl exec -it redis-cluster-0 -- redis-cli CLUSTER ADDSLOTS {0..5460}
+kubectl exec -it redis-cluster-1 -- redis-cli CLUSTER ADDSLOTS {5461..10922}
+kubectl exec -it redis-cluster-2 -- redis-cli CLUSTER ADDSLOTS {10923..16383}
+
+kubectl exec -it redis-cluster-3 -- redis-cli CLUSTER REPLICATE $i_m1
+kubectl exec -it redis-cluster-4 -- redis-cli CLUSTER REPLICATE $i_m2
+kubectl exec -it redis-cluster-5 -- redis-cli CLUSTER REPLICATE $i_m3
+```
+
+
+### Скриншоты кластера
+
+
+![Кластер Redis](Scaling/pngs/1.png)
+
+![Кластер Redis](Scaling/pngs/2.png)
 </details>
