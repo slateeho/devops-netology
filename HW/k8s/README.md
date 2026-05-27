@@ -13,3 +13,14 @@
 
 
 </details>
+
+
+<details>
+<summary>2. Базовые объекты K8S</summary>
+
+# Скриншот `kubectl port-forward service, pod` и  `kubectl get pods`
+
+![](k8s-base-obj/pngs/1.png)
+
+
+</details>
