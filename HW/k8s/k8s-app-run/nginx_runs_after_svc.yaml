@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-2
+  labels:
+    app.kubernetes.io/name: nginx
+spec:
+  containers:
+  - name: nginx-2-pod
+    image: nginx
+    ports:
+    - containerPort: 80    
+    imagePullPolicy: IfNotPresent
+  initContainers:
+  - name: init-nginx
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup nginx-2.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]

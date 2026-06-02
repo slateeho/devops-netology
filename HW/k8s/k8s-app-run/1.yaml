@@ -1,0 +1,232 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/containerID: 31b89af6722588fafec3a49fc59499e619ff7240ba1f14384954848f56b2b6a3
+    cni.projectcalico.org/podIP: 10.244.0.80/32
+    cni.projectcalico.org/podIPs: 10.244.0.80/32
+    kubectl.kubernetes.io/restartedAt: "2026-05-30T13:57:41+03:00"
+  creationTimestamp: "2026-05-30T10:57:41Z"
+  generateName: coredns-975dc7979-
+  generation: 1
+  labels:
+    k8s-app: kube-dns
+    pod-template-hash: 975dc7979
+  name: coredns-975dc7979-797ck
+  namespace: kube-system
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: coredns-975dc7979
+    uid: dd147849-7f9e-409d-a013-7d8bccd4758c
+  resourceVersion: "240646"
+  uid: 8feeb0b1-41e0-4c5c-b3a5-abc54ff8cbf0
+spec:
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: k8s-app
+              operator: In
+              values:
+              - kube-dns
+          topologyKey: kubernetes.io/hostname
+        weight: 100
+  containers:
+  - args:
+    - -conf
+    - /etc/coredns/Corefile
+    image: registry.k8s.io/coredns/coredns:v1.13.1
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 5
+      httpGet:
+        path: /health
+        port: liveness-probe
+        scheme: HTTP
+      initialDelaySeconds: 60
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    name: coredns
+    ports:
+    - containerPort: 53
+      name: dns
+      protocol: UDP
+    - containerPort: 53
+      name: dns-tcp
+      protocol: TCP
+    - containerPort: 9153
+      name: metrics
+      protocol: TCP
+    - containerPort: 8080
+      name: liveness-probe
+      protocol: TCP
+    - containerPort: 8181
+      name: readiness-probe
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /ready
+        port: readiness-probe
+        scheme: HTTP
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    resources:
+      limits:
+        memory: 170Mi
+      requests:
+        cpu: 100m
+        memory: 70Mi
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities:
+        add:
+        - NET_BIND_SERVICE
+        - SYS_ADMIN
+        - NET_ADMIN
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/coredns
+      name: config-volume
+      readOnly: true
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-l5llh
+      readOnly: true
+  dnsPolicy: Default
+  enableServiceLinks: true
+  nodeName: aser
+  nodeSelector:
+    kubernetes.io/os: linux
+  preemptionPolicy: PreemptLowerPriority
+  priority: 2000000000
+  priorityClassName: system-cluster-critical
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext:
+    runAsUser: 0
+  serviceAccount: coredns
+  serviceAccountName: coredns
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - configMap:
+      defaultMode: 420
+      items:
+      - key: Corefile
+        path: Corefile
+      name: coredns
+    name: config-volume
+  - name: kube-api-access-l5llh
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2026-05-30T10:57:42Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2026-05-30T10:57:41Z"
+    observedGeneration: 1
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2026-05-30T10:57:42Z"
+    observedGeneration: 1
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2026-05-30T10:57:42Z"
+    observedGeneration: 1
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2026-05-30T10:57:41Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - allocatedResources:
+      cpu: 100m
+      memory: 70Mi
+    containerID: cri-o://45ba815b11abebfb7b552d7c27f07de466c6b942a1669e832c2d6ae2ead566e5
+    image: registry.k8s.io/coredns/coredns:v1.13.1
+    imageID: registry.k8s.io/coredns/coredns@sha256:246e7333fde10251c693b68f13d21d6d64c7dbad866bbfa11bd49315e3f725a7
+    lastState: {}
+    name: coredns
+    ready: true
+    resources:
+      limits:
+        memory: 170Mi
+      requests:
+        cpu: 100m
+        memory: 70Mi
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2026-05-30T10:57:42Z"
+    user:
+      linux:
+        gid: 0
+        supplementalGroups:
+        - 0
+        uid: 0
+    volumeMounts:
+    - mountPath: /etc/coredns
+      name: config-volume
+      readOnly: true
+      recursiveReadOnly: Disabled
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-l5llh
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 192.168.1.218
+  hostIPs:
+  - ip: 192.168.1.218
+  observedGeneration: 1
+  phase: Running
+  podIP: 10.244.0.80
+  podIPs:
+  - ip: 10.244.0.80
+  qosClass: Burstable
+  startTime: "2026-05-30T10:57:41Z"
