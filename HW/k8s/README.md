@@ -44,7 +44,6 @@
 
 ## Создание Service, который обеспечит доступ до реплик приложений из п.1.
 
-
 ![](k8s-app-run/pngs/2-1.png)
 
 ## Создание отдельного Pod с приложением multitool и убедиться с помощью curl, что из пода есть доступ до приложений из п.1.
@@ -67,5 +66,37 @@
 
 ![](k8s-app-run/pngs/5.png)
 
+
+</details>
+
+
+<details>
+<summary>4. Сетевое взаимодействие в Kubernetes</summary>
+
+## Задание 1: Настройка Service (ClusterIP и NodePort)
+
+### Манифесты:
+- [deployment-multi-container.yaml](k8s-svc/deployment-multi-container.yaml)
+- [service-clusterip.yaml](k8s-svc/service-clusterip.yaml)
+- [service-nodeport.yaml](k8s-svc/service-nodeport.yaml)
+
+### Проверка доступности:
+
+![](k8s-svc/pngs/1.png)
+
+---
+
+## Задание 2: Настройка Ingress
+
+### Манифесты:
+- [deployment-frontend.yaml](k8s-svc/deployment-frontend.yaml)
+- [deployment-backend.yaml](k8s-svc/deployment-backend.yaml)
+- [service-frontend.yaml](k8s-svc/service-frontend.yaml)
+- [service-backend.yaml](k8s-svc/service-backend.yaml)
+- [ingress.yaml](k8s-svc/ingress.yaml)
+
+### Проверка доступности:
+
+![](k8s-svc/pngs/3.png)
 
 </details>

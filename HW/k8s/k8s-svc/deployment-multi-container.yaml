@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multi-container-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: multi-app
+  template:
+    metadata:
+      labels:
+        app: multi-app
+    spec:
+      shareProcessNamespace: true
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+      - name: multitool
+        image: wbitt/network-multitool
+        securityContext:
+          capabilities:
+            add:
+            - SYS_PTRACE
+        ports:
+        - containerPort: 8080
+        env:
+        - name: HTTP_PORT
+          value: "8080"
