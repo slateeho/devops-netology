@@ -221,3 +221,9 @@ HW/Observability/Monitoring_systems/data/
 *.db
 HW/Observability/Monitoring_systems/data/influxdb/
 !HW/Observability/Monitoring_systems/awesome_monitoring/*.log
+HW/k8s/k8s-rbac/ca.crt
+*.crt
+*.csr
+ca.*
+developer.*
+tls.*

@@ -100,3 +100,85 @@
 ![](k8s-svc/pngs/3.png)
 
 </details>
+
+<details>
+<summary>5. Хранение  в K8S</summary>
+
+## Задание 1. Volume: обмен данными между контейнерами в поде
+
+### Манифесты:
+
+- [containers-data-exchange.yaml](k8s-pv/containers-data-exchange.yaml)
+
+### Скриншоты
+
+![](k8s-pv/pngs/1.png)
+
+
+## Задание 2. PV, PVC
+
+### Манифесты:
+
+- [pv-pvc.yaml](k8s-pv/pv-pvc.yaml)
+
+### Скриншоты
+![](k8s-pv/pngs/2-2.png)
+![](k8s-pv/pngs/3-2.png)
+![](k8s-pv/pngs/3-3.png)
+
+Как следует из описания политики `Retain` PV, её декларирование позволяет вручную высвобождать носители информации. Когда PVC уже удален, PV еще существует со статусом `released`, что видно исходя из представленного скриншота [pv_after_deploy_pvc_deletion](https://kubernetes.io/docs/concepts/storage/persistent-volumes)
+
+## Задание 3. StorageClass
+
+cc
+
+### Скриншоты
+
+![](k8s-pv/pngs/4-4.png)
+
+![](k8s-pv/pngs/5-5.png)
+
+</details>
+
+<details>
+<summary>4. Сетевое взаимодействие в Kubernetes</summary>
+
+# Задание 1: Работа с ConfigMaps
+
+### Манифесты:
+
+- [deployment.yaml](k8s-rbac/deployment.yaml)
+- [configmap-web.yaml](k8s-rbac/configmap-web.yaml)
+
+
+### Скриншоты
+
+![](k8s-rbac/pngs/1.png)
+
+# Задание 2: Настройка HTTPS с Secrets
+
+### Манифесты:
+
+- [secret-tls.yaml](k8s-rbac/secret-tls.yaml)
+- [ingress-tls.yaml](k8s-rbac/ingress-tls.yaml)
+
+### Скриншоты
+
+![](k8s-rbac/pngs/2.png)
+
+
+# Задание 3: Настройка RBAC
+
+
+Манифесты:
+- [role-pod-reader.yaml](k8s-rbac/role-pod-reader.yaml)
+- [rolebinding-developer.yaml](k8s-rbac/rolebinding-developer.yaml)
+
+
+### Скриншоты
+
+![](k8s-rbac/pngs/3.png)
+
+</details>
+
+

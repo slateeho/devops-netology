@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-m1
+  namespace: test
+data:
+  index.html: |
+    <HTML>
+    <HEAD><TITLE>K8s nginx</TITLE></HEAD>
+    <BODY>
+    <H1>Welcome to K8s Nginx</H1>
+    </BODY></HTML
