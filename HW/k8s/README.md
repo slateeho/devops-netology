@@ -170,7 +170,7 @@ cc
 # Задание 3: Настройка RBAC
 
 
-Манифесты:
+###  Манифесты:
 - [role-pod-reader.yaml](k8s-rbac/role-pod-reader.yaml)
 - [rolebinding-developer.yaml](k8s-rbac/rolebinding-developer.yaml)
 
@@ -181,4 +181,25 @@ cc
 
 </details>
 
+<details>
+<summary>5. Helm</summary>
 
+# Задание 1. Подготовить Helm-чарт для приложения
+
+
+###  Манифесты:
+
+[values-app1.yaml](k8s-helm/app-template/values-app1.yaml) 
+
+[values-app2.yaml](k8s-helm/app-template/values-app2.yaml)
+
+# Задание 2. Запустить две версии в разных неймспейсах
+
+
+###  Скриншоты:
+
+![](k8s-helm/pngs/1.png)
+
+![](k8s-helm/pngs/2.png)
+
+</details>
