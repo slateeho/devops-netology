@@ -13,7 +13,7 @@ localAPIEndpoint:
   advertiseAddress: 192.168.1.218
   bindPort: 6443
 nodeRegistration:
-  criSocket: unix:///var/run/crio/crio.sock
+  criSocket: unix:///var/run/containerd/containerd.sock
   imagePullPolicy: IfNotPresent
   imagePullSerial: true
   name: aser
