@@ -203,3 +203,69 @@ cc
 ![](k8s-helm/pngs/2.png)
 
 </details>
+
+<details>
+<summary>6. Установка Kubernetes с помощью kubeadm, kubespray</summary>
+
+# Домашнее задание к занятию «Установка Kubernetes»
+
+## Задание 1. Установка кластера Kubernetes
+
+Скриншоты проверки  кластера:
+
+![Kubernetes Nodes](k8s-nodes/pngs/1.png)
+
+
+## Задание 2*. Установка HA-кластера
+
+Приведена конфигурация кластера с нечётным количеством нод — 3:
+
+```text
+aser
+master-2
+master-3
+```
+
+# Манифесты + Конфигурации 
+
+Для доступа к Kubernetes API используется связка `keepalived + HAProxy`.
+
+## HAProxy
+
+Конфигурация HAProxy:
+
+```text
+global
+  log stdout local0
+
+defaults
+  mode tcp
+  timeout connect 5s
+  timeout client 50s
+  timeout server 50s
+
+listen kubernetes-apiserver
+  bind *:16443
+  balance roundrobin
+  server master1 192.168.1.218:6443 check
+  server master2 192.168.1.229:6443 check
+  server master3 192.168.1.128:6443 check
+```
+
+Манифест мастера
+
+[kubeadm-config](k8s-nodes/manifests/kubeadm-config.yaml)
+
+Конфигурация keepalived master-3
+
+[keepalived-master conf](k8s-nodes/manifests/keepalived-master-3.conf)
+
+Конфигурация keepalived хоста
+
+[keepalived-host](k8s-nodes/manifests/keepalived-host.conf)
+
+# Скриншоты 
+
+![Kubernetes Nodes](k8s-nodes/pngs/2.png)
+
+</details>
