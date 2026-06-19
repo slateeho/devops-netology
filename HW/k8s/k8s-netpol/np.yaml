@@ -1,0 +1,47 @@
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: default-deny-ingress
+  namespace: app
+spec:
+  policyTypes:
+    - Ingress
+  podSelector:
+    matchLabels: {}
+
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-front-to-back
+  namespace: app
+spec:
+  podSelector:
+    matchLabels:
+      app: app-backend
+  policyTypes:
+    - Ingress
+  ingress: 
+    - from:
+       - podSelector:
+           matchLabels:
+             app: app-frontend
+
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-back-to-cache
+  namespace: app
+spec:
+  podSelector:
+    matchLabels:
+      app: app-cache
+  policyTypes:
+    - Ingress
+  ingress: 
+    - from:
+       - podSelector:
+           matchLabels:
+             app: app-backend

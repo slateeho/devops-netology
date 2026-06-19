@@ -431,3 +431,23 @@ Deployment, StatefulSet, Service, Ingress, PVC.
 
 
 </details>
+
+<details>
+<summary>8. Как работает сеть в K8S</summary>
+ 
+
+## Манифесты 
+
+* [`app-frontend.yaml`](k8s-netpol/app-frontend.yaml) — Deployment для pod `frontend`.
+* [`app-backend.yaml`](k8s-netpol/app-backend.yaml) — Deployment для pod `backend`.
+* [`app-cache.yaml`](k8s-netpol/app-cache.yaml) — Deployment для pod `cache`.
+* [`svc-frontend.yaml`](k8s-netpol/svc-frontend.yaml) — Service для доступа к `frontend`.
+* [`svc-backend.yaml`](k8s-netpol/svc-backend.yaml) — Service для доступа к `backend`.
+* [`svc-cache.yaml`](k8s-netpol/svc-cache.yaml) — Service для доступа к `cache`.
+* [`np.yaml`](k8s-netpol/np.yaml) — NetworkPolicy: общий запрет входящего трафика. Политики работают по принципу `default deny` с учетом следующего: разрешены направления `frontend -> backend`, `backend -> cache`; остальные - заблокированы.
+
+## Скриншоты
+
+![](k8s-netpol/pngs/1.png)
+
+</details>

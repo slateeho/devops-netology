@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-backend
+  labels:
+    app: app-backend
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-backend
+  template:
+    metadata:
+      labels:
+        app: app-backend
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool
+        ports:
+        - name: "multitool-http"
+          containerPort: 8180
+        - name: "multitool-https"
+          containerPort: 11443
+        env:
+        - name: HTTP_PORT
+          value: "8180"
+        - name: HTTPS_PORT
+          value: "11443"
+...
