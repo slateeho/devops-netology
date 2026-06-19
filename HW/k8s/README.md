@@ -269,3 +269,165 @@ listen kubernetes-apiserver
 ![Kubernetes Nodes](k8s-nodes/pngs/2.png)
 
 </details>
+
+
+<details>
+<summary>7. Компоненты Kubernetes</summary>
+
+# Расчёт ресурсов Kubernetes-кластера
+
+## Минимальная конфигурация
+
+| Тип ноды | Количество | Количество ядер ЦПУ / ОЗУ |
+| -------- | ---------: | ------------------------- |
+| Worker   |          5 | 8 vCPU / 16 GB RAM        |
+
+Если кластер self-managed, дополнительно нужны control-plane ноды:
+
+| Тип ноды      | Количество | Количество ядер ЦПУ / ОЗУ |
+| ------------- | ---------: | ------------------------- |
+| Control-plane |          3 | 2 vCPU / 4 GB RAM         |
+
+Минимальный вариант для managed Kubernetes: **5 worker-нод по 8 vCPU / 16 GB RAM**.
+
+После отказа одной worker-ноды остаётся **21.6 CPU** и **50.4 GB RAM** доступных ресурсов. Приложению требуется **17 CPU** и **30.25 GB RAM**.
+
+## Размещение workload
+
+| Компонент | Kubernetes object | Реплик | Размещение                                                    |
+| --------- | ----------------- | -----: | ------------------------------------------------------------- |
+| Database  | StatefulSet       |      3 | по worker-нодам с podAntiAffinity + topologySpreadConstraints |
+| Cache     | StatefulSet       |      3 | по worker-нодам с podAntiAffinity + topologySpreadConstraints |
+| Backend   | Deployment        |     10 | worker-ноды                                                   |
+| Frontend  | Deployment        |      5 | worker-ноды                                                   |
+
+Для Database и Cache предполагается использование PVC.
+
+## Helm chart
+
+Приложение упаковывается в Helm chart со следующими основными манифестами:
+
+Deployment, StatefulSet, Service, Ingress, PVC.
+
+Для минимального набора окружений используются отдельные values-файлы:
+
+| Файл              | Назначение       |
+| ----------------- | ---------------- |
+| values.yaml       | базовые значения |
+| values-dev.yaml   | dev              |
+| values-stage.yaml | stage            |
+| values-prod.yaml  | prod             |
+
+В `values` выносятся:
+
+| Блок       | Параметры                                            |
+| ---------- | ---------------------------------------------------- |
+| frontend   | replicas, image, resources, service, ingress         |
+| backend    | replicas, image, resources, service                  |
+| database   | replicas, resources, storageClass, pvcSize           |
+| cache      | replicas, resources, storageClass, pvcSize           |
+| scheduling | nodeSelector, tolerations, topologySpreadConstraints |
+
+## Расчёт ресурсов приложения
+
+| Компонент |     Реплик | RAM на 1 pod | CPU на 1 pod |    Всего RAM |  Всего CPU |
+| --------- | ---------: | -----------: | -----------: | -----------: | ---------: |
+| Database  |          3 |         4 GB |        1 CPU |        12 GB |      3 CPU |
+| Cache     |          3 |         4 GB |        1 CPU |        12 GB |      3 CPU |
+| Frontend  |          5 |        50 MB |      0.2 CPU |       250 MB |      1 CPU |
+| Backend   |         10 |       600 MB |        1 CPU |         6 GB |     10 CPU |
+| **Итого** | **21 pod** |              |              | **30.25 GB** | **17 CPU** |
+
+## Расчёт одной worker-ноды
+
+Берётся worker-нода: **8 vCPU / 16 GB RAM**.
+
+В расчёт системного резерва включается Calico Open Source. Для single-node Calico минимальные требования к host:
+
+| Ресурс | Minimum |
+| ------ | ------: |
+| CPU    | 2 cores |
+| RAM    |    2 GB |
+| Disk   |   10 GB |
+
+Расчёт остатка ресурсов за вычетом ОС, kubelet, DaemonSet и Calico:
+
+| Ресурс |   Raw | System reserve с учётом Calico | Остаток |
+| ------ | ----: | -----------------------------: | ------: |
+| CPU    | 8 CPU |                          2 CPU |   6 CPU |
+| RAM    | 16 GB |                           2 GB |   14 GB |
+
+Расчёт 10% safety overhead:
+
+| Ресурс | Остаток | 10% overhead | Доступно для pod'ов |
+| ------ | ------: | -----------: | ------------------: |
+| CPU    |   6 CPU |      0.6 CPU |         **5.4 CPU** |
+| RAM    |   14 GB |       1.4 GB |         **12.6 GB** |
+
+## Проверка 4 worker-нод
+
+| Показатель                          |            CPU |      RAM |
+| ----------------------------------- | -------------: | -------: |
+| Доступно на 4 worker-нодах          |       21.6 CPU |  50.4 GB |
+| Доступно после отказа 1 worker-ноды |       16.2 CPU |  37.8 GB |
+| Требуется приложению                |         17 CPU | 30.25 GB |
+| Остаток после отказа 1 worker-ноды  |       -0.8 CPU |  7.55 GB |
+| Результат                           | Не хватает CPU |       OK |
+
+Вывод: **4 worker-ноды недостаточно**, так как после отказа одной ноды остаётся только **16.2 CPU**, а приложению требуется **17 CPU**.
+
+## Расчёт worker-пула
+
+Принимается **5 worker-нод**.
+
+| Показатель                          |      CPU |      RAM |
+| ----------------------------------- | -------: | -------: |
+| Доступно на 5 worker-нодах          |   27 CPU |    63 GB |
+| Доступно после отказа 1 worker-ноды | 21.6 CPU |  50.4 GB |
+| Требуется приложению                |   17 CPU | 30.25 GB |
+| Остаток после отказа 1 worker-ноды  |  4.6 CPU | 20.15 GB |
+
+## Распределение ресурсов
+
+| Ресурс | Требуется | Доступно после отказа 1 ноды |    Запас |
+| ------ | --------: | ---------------------------: | -------: |
+| CPU    |    17 CPU |                     21.6 CPU |  4.6 CPU |
+| RAM    |  30.25 GB |                      50.4 GB | 20.15 GB |
+| Pods   |    21 pod |   4 worker-ноды после отказа |       OK |
+
+## Вывод
+
+Минимально достаточно **5 worker-нод по 8 vCPU / 16 GB RAM**.
+
+Расчёт учитывает:
+
+* ресурсы приложения;
+* системный резерв на ОС, kubelet, DaemonSet и Calico;
+* минимальные требования Calico Open Source: 2 CPU, 2 GB RAM, 10 GB disk;
+* 10% safety overhead;
+* отказ 1 worker-ноды;
+* StatefulSet на PVC;
+* Helm chart.
+
+## Ограничения расчёта для использования на практике
+
+Расчёт определяет минимальные compute-ресурсы кластера: **CPU, RAM и количество worker-нод**.
+
+В расчёт `не включены`:
+
+| Ресурс / услуга           | Причина                                                  |
+| ------------------------- | -------------------------------------------------------- |
+| IOPS дисков               | зависит от типа StorageClass и тарифа провайдера по IOPS |
+| throughput дисков         | зависит от типа persistent storage                       |
+| объём PVC                 | зависит от тарифа провайдера                             |
+| snapshots / backups       | оплачиваются отдельно в managed Kubernetes               |
+| load balancer             | зависит от cloud-провайдера                              |
+| public IP                 | может тарифицироваться отдельно                          |
+| network traffic           | зависит от входящего/исходящего трафика                  |
+| managed control-plane fee | зависит от провайдера                                    |
+| monitoring / logging      | может потреблять ресурсы и оплачиваться отдельно         |
+
+Итоговая стоимость managed Kubernetes может отличаться от расчёта, так как у провайдера могут отдельно оплачиваться storage, IOPS, traffic, load balancer, snapshots, logging, monitoring и обслуживание control-plane.
+
+
+</details>
