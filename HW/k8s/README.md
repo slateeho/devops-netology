@@ -130,7 +130,6 @@
 
 ## Задание 3. StorageClass
 
-cc
 
 ### Скриншоты
 
@@ -141,7 +140,7 @@ cc
 </details>
 
 <details>
-<summary>4. Сетевое взаимодействие в Kubernetes</summary>
+<summary>6. Сетевое взаимодействие в Kubernetes</summary>
 
 # Задание 1: Работа с ConfigMaps
 
@@ -182,7 +181,7 @@ cc
 </details>
 
 <details>
-<summary>5. Helm</summary>
+<summary>7. Helm</summary>
 
 # Задание 1. Подготовить Helm-чарт для приложения
 
@@ -205,7 +204,7 @@ cc
 </details>
 
 <details>
-<summary>6. Установка Kubernetes с помощью kubeadm, kubespray</summary>
+<summary>8. Установка Kubernetes с помощью kubeadm, kubespray</summary>
 
 # Домашнее задание к занятию «Установка Kubernetes»
 
@@ -272,7 +271,7 @@ listen kubernetes-apiserver
 
 
 <details>
-<summary>7. Компоненты Kubernetes</summary>
+<summary>9. Компоненты Kubernetes</summary>
 
 # Расчёт ресурсов Kubernetes-кластера
 
@@ -433,7 +432,7 @@ Deployment, StatefulSet, Service, Ingress, PVC.
 </details>
 
 <details>
-<summary>8. Как работает сеть в K8S</summary>
+<summary>10. Как работает сеть в K8S</summary>
  
 
 ## Манифесты 
@@ -449,5 +448,95 @@ Deployment, StatefulSet, Service, Ingress, PVC.
 ## Скриншоты
 
 ![](k8s-netpol/pngs/1.png)
+
+</details>
+
+<details>
+<summary>11. Обновление приложений</summary>
+
+# Домашнее задание к занятию «Обновление приложений»
+
+## Задание 1. Выбрать стратегию обновления приложения
+
+Выбрана стратегия `Recreate`, поскольку условие одновременного запуска старой и новой версии в стратегии `RollingUpdate`  не соответствует условию по совместимости, выбор не в пользу `Blue-Green` и `Canary`  обсусловлен ограничением по ресурсам.
+
+## Задание 2. Обновить приложение
+
+Создан `Deployment` приложения с контейнерами `nginx:1.19` и `multitool`. Количество реплик — 5.
+
+Скриншот проверки pod после создания приложения:
+
+![](k8s-update/pngs/1.png)
+
+Обновление `nginx` до версии `1.20` выполнено с сохранением доступности приложения.
+
+Скриншот обновления, затем неудачного обновления и последующего  отката
+
+![](k8s-update/pngs/1-2.png)
+
+
+# Манифесты
+
+
+Deployment приложения
+
+[deployment.yaml](k8s-update/deployment.yaml)
+
+Service приложения
+
+[service.yaml](k8s-update/service.yaml)
+
+
+## Задание 3*. Canary deployment
+
+Созданы два `Deployment` приложения `nginx`.
+
+При помощи разных `ConfigMap` созданы две версии страницы.
+
+С помощью `Ingress` настроен canary deployment.
+
+Скриншот созданных объектов:
+
+Патч ingress-nginx-controller
+
+![](k8s-update/pngs/2.png)
+
+Основные комманды по Canary deployment
+
+![](k8s-update/pngs/3.png)
+
+# Манифесты Canary
+
+ConfigMap основной версии
+
+[main-configmap.yaml](k8s-update/main-configmap.yaml)
+
+ConfigMap canary-версии
+
+[canary-configmap.yaml](k8s-update/canary-configmap.yaml)
+
+Deployment основной версии
+
+[main-deployment.yaml](k8s-update/main-deployment.yaml)
+
+Deployment canary-версии
+
+[canary-deployment.yaml](k8s-update/canary-deployment.yaml)
+
+Service основной версии
+
+[main-service.yaml](k8s-update/main-service.yaml)
+
+Service canary-версии
+
+[canary-service.yaml](k8s-update/canary-service.yaml)
+
+Ingress основной версии
+
+[main-ingress.yaml](k8s-update/main-ingress.yaml)
+
+Ingress canary-версии
+
+[canary-ingress.yaml](k8s-update/canary-ingress.yaml)
 
 </details>
