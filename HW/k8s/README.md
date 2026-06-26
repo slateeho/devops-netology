@@ -540,3 +540,20 @@ Ingress canary-версии
 [canary-ingress.yaml](k8s-update/canary-ingress.yaml)
 
 </details>
+
+
+
+<details>
+<summary>12. Troubleshooting</summary>
+
+## Проблемы 
+
+### a) отсутствие namespace web и data 
+### b) невозможность  обнаружения (resolve) web-comsumer деплоймента в другом namespace
+
+## Что сделано
+
+![](k8s-troubleshooting/pngs/1.png)
+
+
+</details>
